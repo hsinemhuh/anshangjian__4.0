@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分享心情 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+        
+        .content-area {
+            min-height: 120px;
+            max-height: 250px;
+            overflow-y: auto;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 16px;
+            line-height: 1.6;
+            padding: 16px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        .mood-selector {
+            padding: 16px;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+        
+        .mood-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+        
+        .mood-options {
+            display: flex;
+            overflow-x: auto;
+            gap: 16px;
+            padding-bottom: 8px;
+        }
+        
+        .mood-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+        }
+        
+        .mood-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 8px;
+            background-color: var(--bg-secondary);
+            transition: all 0.2s ease;
+        }
+        
+        .mood-name {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .mood-option.active .mood-icon {
+            background-color: rgba(255, 36, 66, 0.1);
+            color: #ff2442;
+            transform: scale(1.1);
+        }
+        
+        .mood-option.active .mood-name {
+            color: #ff2442;
+            font-weight: 600;
+        }
+        
+        .dark-mode .mood-option.active .mood-icon {
+            background-color: rgba(255, 59, 89, 0.2);
+            color: #ff3b59;
+        }
+        
+        .dark-mode .mood-option.active .mood-name {
+            color: #ff3b59;
+        }
+        
+        .image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 0 16px;
+        }
+        
+        .image-preview {
+            position: relative;
+            width: calc(33.333% - 6px);
+            aspect-ratio: 1/1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .add-image {
+            width: calc(33.333% - 6px);
+            aspect-ratio: 1/1;
+            border-radius: 8px;
+            border: 1px dashed var(--bg-tertiary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            background-color: var(--bg-secondary);
+        }
+        
+        .add-image i {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .add-image span {
+            font-size: 12px;
+        }
+        
+        .location-selector {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-top: 1px solid var(--bg-tertiary);
+        }
+        
+        .location-icon {
+            font-size: 20px;
+            color: var(--text-tertiary);
+            margin-right: 12px;
+        }
+        
+        .visibility-selector {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-top: 1px solid var(--bg-tertiary);
+        }
+        
+        .visibility-icon {
+            font-size: 20px;
+            color: var(--text-tertiary);
+            margin-right: 12px;
+        }
+        
+        .visibility-options {
+            display: flex;
+            gap: 16px;
+            margin-left: auto;
+        }
+        
+        .visibility-option {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            background-color: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+        
+        .visibility-option.active {
+            background-color: rgba(255, 36, 66, 0.1);
+            color: #ff2442;
+        }
+        
+        .dark-mode .visibility-option.active {
+            background-color: rgba(255, 59, 89, 0.2);
+            color: #ff3b59;
+        }
+        
+        .publish-action {
+            padding: 8px 20px;
+            border-radius: 20px;
+            background-color: #ff2442;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .dark-mode .publish-action {
+            background-color: #ff3b59;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <header class="header px-4 py-3 flex items-center">
+            <button onclick="history.back()" class="mr-4" title="返回">
+                <i class="fas fa-arrow-left text-lg"></i>
+            </button>
+            <h1 class="text-lg font-bold flex-1 text-center">分享心情</h1>
+            <button class="publish-action" id="publishButton">发布</button>
+        </header>
+        
+        <!-- 主要内容区 -->
+        <div class="main-content pb-20">
+            <!-- 心情选择器 -->
+            <div class="mood-selector">
+                <div class="mood-title">今天的心情</div>
+                <div class="mood-options">
+                    <div class="mood-option active">
+                        <div class="mood-icon">😊</div>
+                        <div class="mood-name">开心</div>
+                    </div>
+                    <div class="mood-option">
+                        <div class="mood-icon">😌</div>
+                        <div class="mood-name">放松</div>
+                    </div>
+                    <div class="mood-option">
+                        <div class="mood-icon">😔</div>
+                        <div class="mood-name">疲惫</div>
+                    </div>
+                    <div class="mood-option">
+                        <div class="mood-icon">😤</div>
+                        <div class="mood-name">奋斗</div>
+                    </div>
+                    <div class="mood-option">
+                        <div class="mood-icon">😭</div>
+                        <div class="mood-name">崩溃</div>
+                    </div>
+                    <div class="mood-option">
+                        <div class="mood-icon">🤔</div>
+                        <div class="mood-name">思考</div>
+                    </div>
+                    <div class="mood-option">
+                        <div class="mood-icon">😴</div>
+                        <div class="mood-name">困倦</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 内容输入区 -->
+            <textarea class="content-area w-full" placeholder="分享你的心情和感受..."></textarea>
+            
+            <!-- 图片预览区 -->
+            <div class="image-preview-container">
+                <div class="image-preview">
+                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="预览图">
+                    <div class="remove-image">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+                <div class="add-image" id="addImageBtn">
+                    <i class="fas fa-camera"></i>
+                    <span>添加图片</span>
+                </div>
+            </div>
+            
+            <!-- 位置选择器 -->
+            <div class="location-selector">
+                <div class="location-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="text-base">添加位置</div>
+            </div>
+            
+            <!-- 可见性选择器 -->
+            <div class="visibility-selector">
+                <div class="visibility-icon">
+                    <i class="fas fa-eye"></i>
+                    </div>
+                <div class="text-base">谁可以看</div>
+                <div class="visibility-options">
+                    <div class="visibility-option active">公开</div>
+                    <div class="visibility-option">仅关注者</div>
+                    <div class="visibility-option">仅自己</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const moodOptions = document.querySelectorAll('.mood-option');
+            const addImageBtn = document.getElementById('addImageBtn');
+            const publishButton = document.getElementById('publishButton');
+            const visibilityOptions = document.querySelectorAll('.visibility-option');
+            
+            // 心情选项点击事件
+            moodOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // 移除其他选项的active类
+                    moodOptions.forEach(opt => opt.classList.remove('active'));
+                    // 为当前选项添加active类
+                    this.classList.add('active');
+                });
+            });
+            
+            // 可见性选项点击事件
+            visibilityOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // 移除其他选项的active类
+                    visibilityOptions.forEach(opt => opt.classList.remove('active'));
+                    // 为当前选项添加active类
+                    this.classList.add('active');
+                });
+            });
+            
+            // 添加图片按钮点击事件
+            addImageBtn.addEventListener('click', function() {
+                // 这里应该调用系统相册或相机
+                alert('打开相册/相机功能');
+            });
+            
+            // 发布按钮点击事件
+            publishButton.addEventListener('click', function() {
+                const content = document.querySelector('.content-area').value.trim();
+                if (!content) {
+                    alert('请输入内容');
+                    return;
+                }
+                
+                alert('心情发布成功！');
+                window.location.href = 'discover.html';
+            });
+            
+            // 移除图片按钮点击事件
+            const removeButtons = document.querySelectorAll('.remove-image');
+            removeButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const preview = this.parentElement;
+                    preview.remove();
+                });
+            });
+            
+            // 位置选择器点击事件
+            document.querySelector('.location-selector').addEventListener('click', function() {
+                alert('打开位置选择');
+            });
+        });
+    </script>
+</body>
+</html> 

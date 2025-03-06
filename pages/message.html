@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h1 class="text-lg font-semibold">消息</h1>
+                <button class="w-8 h-8 flex items-center justify-center" title="设置">
+                    <i class="fas fa-cog text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content-area">
+            <!-- 消息类型 -->
+            <div class="grid grid-cols-4 gap-4 p-4 border-b border-gray-100">
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-1">
+                        <i class="fas fa-heart text-red-500"></i>
+                    </div>
+                    <span class="text-xs">赞和收藏</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-1">
+                        <i class="fas fa-comment text-blue-500"></i>
+                    </div>
+                    <span class="text-xs">评论</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center mb-1">
+                        <i class="fas fa-user-plus text-purple-500"></i>
+                    </div>
+                    <span class="text-xs">新增关注</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-1">
+                        <i class="fas fa-bell text-green-500"></i>
+                    </div>
+                    <span class="text-xs">系统通知</span>
+                </div>
+            </div>
+
+            <!-- 私信列表 -->
+            <div class="px-4">
+                <h2 class="text-base font-semibold py-3">私信</h2>
+                <!-- 私信项目 -->
+                <div class="space-y-4">
+                    <div class="flex items-center py-3 border-b border-gray-100">
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330" alt="用户头像" class="w-12 h-12 rounded-full">
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">2</span>
+                        </div>
+                        <div class="flex-1 ml-3">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold">考研数学王</h3>
+                                <span class="text-xs text-gray-500">12:30</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">请问高数第三章的例题你是怎么解的？</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center py-3 border-b border-gray-100">
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36" alt="用户头像" class="w-12 h-12 rounded-full">
+                        </div>
+                        <div class="flex-1 ml-3">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold">英语学习群</h3>
+                                <span class="text-xs text-gray-500">昨天</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">[群消息] 今晚8点开始模考讲解</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center py-3 border-b border-gray-100">
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde" alt="用户头像" class="w-12 h-12 rounded-full">
+                        </div>
+                        <div class="flex-1 ml-3">
+                            <div class="flex items-center justify-between">
+                                <h3 class="font-semibold">考研资料分享</h3>
+                                <span class="text-xs text-gray-500">周一</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">谢谢分享的复习资料！</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <nav class="bottom-nav">
+            <div class="nav-items">
+                <a href="home.html" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>首页</span>
+                </a>
+                <a href="discover.html" class="nav-item">
+                    <i class="fas fa-compass"></i>
+                    <span>发现</span>
+                </a>
+                <a href="recite.html" class="nav-item recite-nav-item">
+                    <div class="recite-icon-wrapper">
+                        <i class="fas fa-book-reader"></i>
+                    </div>
+                    <span>背诵比对</span>
+                </a>
+                <a href="message.html" class="nav-item active">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>消息</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>我的</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // 检查是否启用深色模式
+        document.addEventListener('DOMContentLoaded', () => {
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === 'enabled') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            // 检查字体大小
+            const fontSize = localStorage.getItem('fontSize') || '2';
+            applyFontSize(fontSize);
+        });
+        
+        // 应用字体大小
+        function applyFontSize(size) {
+            const sizeClasses = ['text-xs', 'text-sm', 'text-base', 'text-lg'];
+            document.querySelectorAll('.text-sm, .text-xs, .text-base, .text-lg').forEach(el => {
+                // 移除所有字体大小类
+                sizeClasses.forEach(cls => {
+                    el.classList.remove(cls);
+                });
+                
+                // 根据设置添加对应的字体大小类
+                const currentSize = parseInt(size);
+                if (currentSize === 1) {
+                    el.classList.add('text-xs');
+                } else if (currentSize === 2) {
+                    el.classList.add('text-sm');
+                } else if (currentSize === 3) {
+                    el.classList.add('text-base');
+                } else if (currentSize === 4) {
+                    el.classList.add('text-lg');
+                }
+            });
+        }
+    </script>
+</body>
+</html> 

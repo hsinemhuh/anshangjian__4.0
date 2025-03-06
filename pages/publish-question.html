@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提出问题 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+        
+        .question-title {
+            border: none;
+            outline: none;
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--bg-tertiary);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        .question-content {
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 16px;
+            line-height: 1.6;
+            padding: 16px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        .image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 0 16px;
+        }
+        
+        .image-preview {
+            position: relative;
+            width: calc(33.333% - 6px);
+            aspect-ratio: 1/1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .add-image {
+            width: calc(33.333% - 6px);
+            aspect-ratio: 1/1;
+            border-radius: 8px;
+            border: 1px dashed var(--bg-tertiary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            background-color: var(--bg-secondary);
+        }
+        
+        .add-image i {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .add-image span {
+            font-size: 12px;
+        }
+        
+        .category-selector {
+            padding: 16px;
+            border-top: 8px solid var(--bg-secondary);
+        }
+        
+        .category-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+        
+        .category-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .category-option {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: var(--bg-secondary);
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .category-option.active {
+            background-color: rgba(255, 36, 66, 0.1);
+            color: #ff2442;
+        }
+        
+        .dark-mode .category-option.active {
+            background-color: rgba(255, 59, 89, 0.2);
+            color: #ff3b59;
+        }
+        
+        .anonymous-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-top: 1px solid var(--bg-tertiary);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #ff2442;
+        }
+        
+        .dark-mode input:checked + .toggle-slider {
+            background-color: #ff3b59;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .publish-action {
+            padding: 8px 20px;
+            border-radius: 20px;
+            background-color: #ff2442;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .dark-mode .publish-action {
+            background-color: #ff3b59;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <header class="header px-4 py-3 flex items-center">
+            <button onclick="history.back()" class="mr-4" title="返回">
+                <i class="fas fa-arrow-left text-lg"></i>
+            </button>
+            <h1 class="text-lg font-bold flex-1 text-center">提出问题</h1>
+            <button class="publish-action" id="publishButton">发布</button>
+        </header>
+        
+        <!-- 主要内容区 -->
+        <div class="main-content pb-20">
+            <input type="text" class="question-title" placeholder="请输入问题标题（必填）">
+            <textarea class="question-content w-full" placeholder="详细描述你的问题，有助于获得更准确的回答..."></textarea>
+            
+            <div class="image-preview-container">
+                <div class="image-preview">
+                    <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="预览图">
+                    <div class="remove-image">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+                <div class="add-image" id="addImageBtn">
+                    <i class="fas fa-camera"></i>
+                    <span>添加图片</span>
+                </div>
+            </div>
+            
+            <div class="category-selector">
+                <div class="category-title">选择问题分类</div>
+                <div class="category-options">
+                    <div class="category-option active">数学</div>
+                    <div class="category-option">英语</div>
+                    <div class="category-option">政治</div>
+                    <div class="category-option">专业课</div>
+                    <div class="category-option">考研规划</div>
+                    <div class="category-option">院校选择</div>
+                    <div class="category-option">复试</div>
+                    <div class="category-option">其他</div>
+                </div>
+            </div>
+            
+            <div class="anonymous-toggle">
+                <div class="text-base">匿名提问</div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="anonymousToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryOptions = document.querySelectorAll('.category-option');
+            const addImageBtn = document.getElementById('addImageBtn');
+            const publishButton = document.getElementById('publishButton');
+            const anonymousToggle = document.getElementById('anonymousToggle');
+            
+            // 分类选项点击事件
+            categoryOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // 移除其他选项的active类
+                    categoryOptions.forEach(opt => opt.classList.remove('active'));
+                    // 为当前选项添加active类
+                    this.classList.add('active');
+                });
+            });
+            
+            // 添加图片按钮点击事件
+            addImageBtn.addEventListener('click', function() {
+                // 这里应该调用系统相册或相机
+                alert('打开相册/相机功能');
+            });
+            
+            // 发布按钮点击事件
+            publishButton.addEventListener('click', function() {
+                const title = document.querySelector('.question-title').value.trim();
+                if (!title) {
+                    alert('请输入问题标题');
+                    return;
+                }
+                
+                alert('问题发布成功！');
+                window.location.href = 'discover.html';
+            });
+            
+            // 移除图片按钮点击事件
+            const removeButtons = document.querySelectorAll('.remove-image');
+            removeButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const preview = this.parentElement;
+                    preview.remove();
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

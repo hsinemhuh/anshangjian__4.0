@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设置 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .settings-group {
+            margin-bottom: 16px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .settings-item {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+        }
+        
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        
+        .settings-item:active {
+            background-color: #f9f9f9;
+        }
+        
+        .settings-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 18px;
+            color: white;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #ff2442;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+        
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 36, 66, 0.3);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple {
+            to {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+        
+        .badge {
+            background-color: #ff2442;
+            color: white;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+        
+        .version-info {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200">
+            <div class="flex items-center">
+                <button onclick="history.back()" class="mr-4" title="返回">
+                    <i class="fas fa-arrow-left text-xl text-gray-600"></i>
+                </button>
+                <h1 class="text-lg font-semibold">设置</h1>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content-area px-4 py-4">
+            <!-- 账号设置 -->
+            <div class="settings-group">
+                <div class="settings-item" onclick="createRipple(event)">
+                    <div class="flex items-center">
+                        <div class="settings-icon" style="background-color: #4A6CF7;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span>账号与安全</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+                <div class="settings-item" onclick="createRipple(event)">
+                    <div class="flex items-center">
+                        <div class="settings-icon" style="background-color: #00B8A9;">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <span>消息通知</span>
+                        <span class="badge">2</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+                <div class="settings-item" onclick="createRipple(event)">
+                    <div class="flex items-center">
+                        <div class="settings-icon" style="background-color: #F6416C;">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <span>隐私设置</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- 应用设置 -->
+            <div class="settings-group">
+                <div class="settings-item" onclick="window.location.href='appearance.html'; createRipple(event)">
+                    <div class="flex items-center">
+                        <div class="settings-icon" style="background-color: #FF9F1C;">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <span>外观设置</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+                <div class="settings-item">
+                    <div class="flex items-center">
+                        <div class="settings-icon" style="background-color: #2EC4B6;">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <span>仅在WIFI下自动播放</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked title="仅在WIFI下自动播放" aria-label="仅在WIFI下自动播放">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 存储与缓存 -->
+            <div class="settings-group">
+                <div class="settings-item" onclick="createRipple(event)">
+                    <div class="flex items-center">
+                        <div class="settings-icon" style="background-color: #3D84A8;">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <span>存储与缓存</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-500 mr-2">128MB</span>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </div>
+                </div>
+                <div class="settings-item" onclick="showClearCacheDialog(event)">
+                    <div class="flex items-center">
+                        <div class="settings-icon" style="background-color: #E84545;">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <span>清除缓存</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- 关于与帮助 -->
+            <div class="settings-group">
+                <div class="settings-item" onclick="createRipple(event)">
+                    <div class="flex items-center">
+                        <div class="settings-icon" style="background-color: #46B5D1;">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <span>帮助与反馈</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+                <div class="settings-item" onclick="checkForUpdates(event)">
+                    <div class="flex items-center">
+                        <div class="settings-icon" style="background-color: #00B8A9;">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <span>检查更新</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+                <div class="settings-item" onclick="createRipple(event)">
+                    <div class="flex items-center">
+                        <div class="settings-icon" style="background-color: #6C757D;">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <span>关于岸上见</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- 退出登录 -->
+            <div class="mt-6">
+                <button class="w-full py-3 text-center text-red-500 font-semibold bg-white rounded-lg" onclick="showLogoutConfirm()">
+                    退出登录
+                </button>
+            </div>
+
+            <!-- 版本信息 -->
+            <div class="version-info">
+                <p>岸上见 v1.0.0</p>
+                <p>© 2023 岸上见团队 版权所有</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 清除缓存对话框 -->
+    <div id="clearCacheDialog" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg w-4/5 max-w-sm overflow-hidden">
+            <div class="p-5">
+                <h3 class="text-lg font-semibold mb-2">清除缓存</h3>
+                <p class="text-gray-600">确定要清除所有缓存数据吗？这将释放约128MB的存储空间。</p>
+            </div>
+            <div class="flex border-t border-gray-200">
+                <button class="flex-1 p-3 text-gray-600" onclick="closeDialog('clearCacheDialog')">取消</button>
+                <button class="flex-1 p-3 text-red-500 font-semibold" onclick="clearCache()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 退出登录确认对话框 -->
+    <div id="logoutDialog" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg w-4/5 max-w-sm overflow-hidden">
+            <div class="p-5">
+                <h3 class="text-lg font-semibold mb-2">退出登录</h3>
+                <p class="text-gray-600">确定要退出当前账号吗？</p>
+            </div>
+            <div class="flex border-t border-gray-200">
+                <button class="flex-1 p-3 text-gray-600" onclick="closeDialog('logoutDialog')">取消</button>
+                <button class="flex-1 p-3 text-red-500 font-semibold" onclick="logout()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 更新检查对话框 -->
+    <div id="updateDialog" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg w-4/5 max-w-sm overflow-hidden">
+            <div class="p-5">
+                <div class="flex items-center justify-center mb-4">
+                    <div id="updateSpinner" class="loading-spinner"></div>
+                </div>
+                <h3 class="text-lg font-semibold mb-2 text-center" id="updateTitle">正在检查更新...</h3>
+                <p class="text-gray-600 text-center" id="updateMessage">请稍候，正在检查是否有新版本可用</p>
+            </div>
+            <div class="flex border-t border-gray-200" id="updateActions">
+                <button class="flex-1 p-3 text-gray-600" onclick="closeDialog('updateDialog')">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 创建点击涟漪效果
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const ripple = document.createElement('span');
+            const rect = button.getBoundingClientRect();
+            
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            ripple.classList.add('ripple');
+            
+            button.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+        
+        // 切换深色模式
+        function toggleDarkMode() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            if (darkModeToggle.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+        
+        // 显示对话框
+        function showDialog(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        
+        // 关闭对话框
+        function closeDialog(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+        
+        // 显示清除缓存对话框
+        function showClearCacheDialog(event) {
+            createRipple(event);
+            showDialog('clearCacheDialog');
+        }
+        
+        // 清除缓存
+        function clearCache() {
+            // 模拟清除缓存过程
+            setTimeout(() => {
+                closeDialog('clearCacheDialog');
+                showToast('缓存已清除');
+            }, 1000);
+        }
+        
+        // 显示退出登录确认对话框
+        function showLogoutConfirm() {
+            showDialog('logoutDialog');
+        }
+        
+        // 退出登录
+        function logout() {
+            // 模拟退出登录过程
+            setTimeout(() => {
+                closeDialog('logoutDialog');
+                window.location.href = 'login.html';
+            }, 1000);
+        }
+        
+        // 检查更新
+        function checkForUpdates(event) {
+            createRipple(event);
+            showDialog('updateDialog');
+            
+            // 模拟检查更新过程
+            setTimeout(() => {
+                document.getElementById('updateSpinner').style.display = 'none';
+                document.getElementById('updateTitle').textContent = '发现新版本';
+                document.getElementById('updateMessage').textContent = '岸上见 v1.1.0 已发布，包含多项新功能和性能优化';
+                
+                const updateActions = document.getElementById('updateActions');
+                updateActions.innerHTML = `
+                    <button class="flex-1 p-3 text-gray-600" onclick="closeDialog('updateDialog')">稍后更新</button>
+                    <button class="flex-1 p-3 text-blue-500 font-semibold" onclick="startUpdate()">立即更新</button>
+                `;
+            }, 2000);
+        }
+        
+        // 开始更新
+        function startUpdate() {
+            document.getElementById('updateSpinner').style.display = 'block';
+            document.getElementById('updateTitle').textContent = '正在下载更新...';
+            document.getElementById('updateMessage').textContent = '下载进度：0%';
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                document.getElementById('updateMessage').textContent = `下载进度：${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    document.getElementById('updateTitle').textContent = '更新完成';
+                    document.getElementById('updateMessage').textContent = '新版本已下载完成，将在重启后生效';
+                    
+                    const updateActions = document.getElementById('updateActions');
+                    updateActions.innerHTML = `
+                        <button class="flex-1 p-3 text-blue-500 font-semibold" onclick="restartApp()">立即重启</button>
+                    `;
+                }
+            }, 300);
+        }
+        
+        // 重启应用
+        function restartApp() {
+            closeDialog('updateDialog');
+            showToast('应用正在重启...');
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        }
+        
+        // 显示提示消息
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full text-sm z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 500);
+            }, 2000);
+        }
+        
+        // 检查是否启用深色模式
+        document.addEventListener('DOMContentLoaded', () => {
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === 'enabled') {
+                document.getElementById('darkModeToggle').checked = true;
+                document.body.classList.add('dark-mode');
+            }
+        });
+    </script>
+</body>
+</html> 

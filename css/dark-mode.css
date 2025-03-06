@@ -1,0 +1,456 @@
+/* 深色模式样式 */
+:root {
+    --primary-color: #ff2442;
+    --primary-color-dark: #e01f3d;
+    --text-color: #333333;
+    --text-color-secondary: #666666;
+    --text-color-tertiary: #999999;
+    --bg-color: #ffffff;
+    --bg-color-secondary: #f7f7f7;
+    --bg-color-tertiary: #f0f0f0;
+    --border-color: #e0e0e0;
+    --card-bg: #ffffff;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --nav-bg: rgba(255, 255, 255, 0.9);
+    --nav-border: #f0f0f0;
+    --background-color: #f5f5f5;
+    --card-background: #ffffff;
+    --success-color: #34C759;
+    --warning-color: #FF9500;
+    --error-color: #FF3B30;
+    --info-color: #007AFF;
+}
+
+body.dark-mode {
+    --primary-color: #ff3b57;
+    --primary-color-dark: #ff2442;
+    --text-color: #f5f5f5;
+    --text-color-secondary: #b0b0b0;
+    --text-color-tertiary: #808080;
+    --bg-color: #121212;
+    --bg-color-secondary: #1e1e1e;
+    --bg-color-tertiary: #2a2a2a;
+    --border-color: #2c2c2c;
+    --card-bg: #1e1e1e;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --nav-bg: rgba(18, 18, 18, 0.9);
+    --nav-border: #333333;
+    --background-color: #121212;
+    --card-background: #1e1e1e;
+    --success-color: #30d158;
+    --warning-color: #ffa01e;
+    --error-color: #ff453a;
+    --info-color: #0a84ff;
+}
+
+/* 应用深色模式变量 */
+body.dark-mode {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* 导航栏 */
+body.dark-mode .bottom-nav {
+    background: var(--nav-bg);
+    border-top-color: var(--nav-border);
+}
+
+body.dark-mode .nav-item {
+    color: var(--text-color-tertiary);
+}
+
+body.dark-mode .nav-item.active {
+    color: var(--primary-color);
+}
+
+/* 顶部导航栏 */
+body.dark-mode .sticky.top-0.bg-white {
+    background-color: var(--bg-color) !important;
+    border-bottom-color: var(--border-color);
+}
+
+body.dark-mode h1, 
+body.dark-mode h2, 
+body.dark-mode h3 {
+    color: var(--text-color);
+}
+
+body.dark-mode .text-gray-600,
+body.dark-mode .text-gray-500,
+body.dark-mode .text-gray-400 {
+    color: var(--text-color-secondary) !important;
+}
+
+/* 内容卡片 */
+body.dark-mode .content-card,
+body.dark-mode .settings-group,
+body.dark-mode .content-box {
+    background-color: var(--card-bg);
+    box-shadow: var(--card-shadow);
+}
+
+body.dark-mode .settings-item {
+    border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .settings-item:active {
+    background-color: var(--bg-color-secondary);
+}
+
+/* 输入框 */
+body.dark-mode .search-input,
+body.dark-mode .input-area {
+    background-color: var(--bg-color-secondary);
+    color: var(--text-color);
+}
+
+body.dark-mode textarea,
+body.dark-mode input[type="text"],
+body.dark-mode input[type="search"] {
+    background-color: var(--bg-color-secondary);
+    color: var(--text-color);
+}
+
+/* 按钮 */
+body.dark-mode .primary-btn {
+    background-color: var(--primary-color);
+}
+
+body.dark-mode .secondary-btn {
+    background-color: var(--bg-color-secondary);
+    color: var(--text-color);
+}
+
+body.dark-mode .upload-btn {
+    background-color: var(--bg-color-secondary);
+    color: var(--text-color-secondary);
+}
+
+/* 对话框 */
+body.dark-mode #clearCacheDialog .bg-white,
+body.dark-mode #logoutDialog .bg-white,
+body.dark-mode #updateDialog .bg-white,
+body.dark-mode #tutorialOverlay .tutorial-content {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+/* 外观设置页面样式 */
+.appearance-option {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.appearance-option.selected {
+    border-color: var(--primary-color);
+}
+
+.appearance-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-right: 16px;
+    position: relative;
+}
+
+.preview-top {
+    height: 20%;
+    background: #007AFF;
+}
+
+.preview-content {
+    height: 80%;
+    padding: 4px;
+}
+
+.preview-line {
+    height: 3px;
+    border-radius: 1px;
+    margin-bottom: 3px;
+    width: 80%;
+}
+
+/* 浅色预览 */
+.light-preview .preview-content {
+    background: #FFFFFF;
+}
+
+.light-preview .preview-line {
+    background: #DDDDDD;
+}
+
+/* 深色预览 */
+.dark-preview .preview-content {
+    background: #121212;
+}
+
+.dark-preview .preview-line {
+    background: #444444;
+}
+
+/* 跟随系统预览 */
+.system-preview .preview-content {
+    background: linear-gradient(to right, #FFFFFF 50%, #121212 50%);
+}
+
+.system-preview .preview-line {
+    background: linear-gradient(to right, #DDDDDD 50%, #444444 50%);
+}
+
+/* 主题颜色选择 */
+.color-option {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin: 0 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    position: relative;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+}
+
+.color-option.selected::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+.color-red {
+    background: #ff2442;
+}
+
+.color-blue {
+    background: #007AFF;
+}
+
+.color-green {
+    background: #34C759;
+}
+
+.color-purple {
+    background: #AF52DE;
+}
+
+.color-orange {
+    background: #FF9500;
+}
+
+/* 字体大小预览 */
+.font-size-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.font-size-preview {
+    flex: 1;
+    padding: 0 16px;
+}
+
+.font-size-preview p {
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #000000 !important;
+}
+
+body.dark-mode .font-size-preview p {
+    color: #ffffff !important;
+}
+
+.font-size-small p {
+    font-size: 14px;
+}
+
+.font-size-medium p {
+    font-size: 16px;
+}
+
+.font-size-large p {
+    font-size: 18px;
+}
+
+.font-size-xlarge p {
+    font-size: 20px;
+}
+
+/* 全局字体大小 */
+body.font-size-small {
+    font-size: 14px;
+}
+
+body.font-size-medium {
+    font-size: 16px;
+}
+
+body.font-size-large {
+    font-size: 18px;
+}
+
+body.font-size-xlarge {
+    font-size: 20px;
+}
+
+/* 主题颜色 */
+body.theme-red {
+    --primary-color: #ff2442;
+    --primary-color-dark: #e01f3d;
+}
+
+body.theme-blue {
+    --primary-color: #007AFF;
+    --primary-color-dark: #0062cc;
+}
+
+body.theme-green {
+    --primary-color: #34C759;
+    --primary-color-dark: #28a745;
+}
+
+body.theme-purple {
+    --primary-color: #AF52DE;
+    --primary-color-dark: #9741c9;
+}
+
+body.theme-orange {
+    --primary-color: #FF9500;
+    --primary-color-dark: #e68600;
+}
+
+/* 深色模式下的主题颜色 */
+body.dark-mode.theme-red {
+    --primary-color: #ff3b57;
+    --primary-color-dark: #ff2442;
+}
+
+body.dark-mode.theme-blue {
+    --primary-color: #0a84ff;
+    --primary-color-dark: #007AFF;
+}
+
+body.dark-mode.theme-green {
+    --primary-color: #30d158;
+    --primary-color-dark: #34C759;
+}
+
+body.dark-mode.theme-purple {
+    --primary-color: #bf5af2;
+    --primary-color-dark: #AF52DE;
+}
+
+body.dark-mode.theme-orange {
+    --primary-color: #ffa01e;
+    --primary-color-dark: #FF9500;
+}
+
+/* 确保深色模式下文字可见性 */
+body.dark-mode .text-gray-600 {
+    color: #b0b0b0 !important;
+}
+
+body.dark-mode .text-gray-500 {
+    color: #a0a0a0 !important;
+}
+
+body.dark-mode .text-gray-400 {
+    color: #909090 !important;
+}
+
+body.dark-mode .text-gray-300 {
+    color: #808080 !important;
+}
+
+body.dark-mode .text-black {
+    color: #f5f5f5 !important;
+}
+
+body.dark-mode .bg-white {
+    background-color: var(--bg-color) !important;
+}
+
+body.dark-mode .bg-gray-100 {
+    background-color: var(--bg-color-secondary) !important;
+}
+
+body.dark-mode .bg-gray-200 {
+    background-color: var(--bg-color-tertiary) !important;
+}
+
+body.dark-mode .border-gray-100,
+body.dark-mode .border-gray-200,
+body.dark-mode .border-gray-300 {
+    border-color: var(--border-color) !important;
+}
+
+/* 确保输入框和文本区域在深色模式下的文字可见性 */
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+    color: var(--text-color) !important;
+    background-color: var(--bg-color-secondary) !important;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: var(--text-color-tertiary) !important;
+}
+
+/* 确保按钮文字在深色模式下可见 */
+body.dark-mode button {
+    color: var(--text-color);
+}
+
+body.dark-mode button.text-red-500 {
+    color: #ff3b57 !important;
+}
+
+body.dark-mode button.text-blue-500 {
+    color: #0a84ff !important;
+}
+
+body.dark-mode button.text-green-500 {
+    color: #30d158 !important;
+}
+
+body.dark-mode a.text-red-500 {
+    color: #ff3b57 !important;
+}
+
+body.dark-mode a.text-blue-500 {
+    color: #0a84ff !important;
+}
+
+body.dark-mode a.text-green-500 {
+    color: #30d158 !important;
+}
+
+/* 确保卡片和对话框在深色模式下的文字可见性 */
+body.dark-mode .card,
+body.dark-mode .dialog,
+body.dark-mode .modal {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+}
+
+/* Toast消息在深色模式下的样式 */
+body.dark-mode .toast {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    color: #ffffff !important;
+} 

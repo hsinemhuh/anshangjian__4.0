@@ -1,0 +1,4839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>背诵比对 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .content-box {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin: 16px auto;
+            overflow: hidden;
+            padding: 0;
+            max-width: 92%;
+            width: 100%;
+        }
+
+        .dark-mode .content-box {
+            background: #1c1c1e;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .box-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .input-area {
+            min-height: 140px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            border-top: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+
+        .upload-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #ebebeb;
+        }
+
+        .voice-record-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ff2442;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .voice-record-btn::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #ff2442;
+            opacity: 0.3;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .voice-record-btn.recording::before {
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-record-btn.recording {
+            background: #e61e3c;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .result-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .result-panel.show {
+            transform: translateY(0);
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid #ff2442;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff2442;
+            margin: 0 auto 16px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #ff2442;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .example-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #f5f5f5;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .example-btn:hover, .example-btn:active {
+            background: #ebebeb;
+            transform: scale(1.05);
+        }
+
+        .recording-timer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .recording-timer.show {
+            display: block;
+        }
+
+        .highlight {
+            background: #fff3f5;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+
+        .diff-text {
+            color: #ff2442;
+            text-decoration: line-through;
+        }
+
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tutorial-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .tutorial-content {
+            background: white;
+            width: 90%;
+            max-width: 360px;
+            margin: auto;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .tutorial-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: #ff2442;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto;
+            }
+            
+            .input-area {
+                min-height: 120px;
+            }
+        }
+
+        /* 添加示例选择器样式 */
+        .example-selector {
+            position: absolute;
+            top: 50px;
+            right: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 12px;
+            z-index: 100;
+            width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .example-selector.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .example-item {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .example-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .example-item:hover {
+            background: #f5f5f5;
+        }
+
+        .example-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .example-item-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        @media (min-width: 768px) {
+            .cards-container {
+                padding: 0 24px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200">
+        <div class="flex items-center">
+            <button onclick="history.back()" class="mr-4" title="返回">
+                <i class="fas fa-arrow-left text-xl text-gray-600"></i>
+            </button>
+            <h1 class="text-lg font-semibold">背诵比对</h1>
+            <button class="ml-auto text-sm text-gray-500" onclick="showTutorial()">
+                <i class="fas fa-question-circle mr-1"></i>
+                使用说明
+            </button>
+        </div>
+    </div>
+
+    <!-- 卡片容器 -->
+    <div class="cards-container">
+        <!-- 正确版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">正确版本</span>
+                <span class="text-sm text-gray-500">请输入要背诵的内容</span>
+                <button class="example-btn" onclick="toggleExampleSelector()">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>加载示例</span>
+                </button>
+                <div class="example-selector" id="exampleSelector">
+                    <div class="example-item" onclick="loadExample('philosophy')">
+                        <div class="example-item-title">马克思主义哲学</div>
+                        <div class="example-item-desc">认识论基本原理</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('politics')">
+                        <div class="example-item-title">政治经济学</div>
+                        <div class="example-item-desc">商品的二因素</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('history')">
+                        <div class="example-item-title">中国近代史</div>
+                        <div class="example-item-desc">新民主主义革命</div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area" id="correctVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'correct')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'correct')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 背诵版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">背诵版本</span>
+                <span class="text-sm text-gray-500">请提交您的背诵内容</span>
+            </div>
+            <div class="input-area" id="reciteVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'recite')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'recite')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+                <button class="voice-record-btn" id="recordBtn" title="语音录制">
+                    <i class="fas fa-microphone"></i>
+                    <span class="recording-timer" id="recordingTimer">00:00</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 比对按钮 -->
+        <button class="compare-btn" id="compareBtn" onclick="startCompare()">
+            开始比对
+        </button>
+    </div>
+
+    <!-- 比对结果面板 -->
+    <div class="result-panel" id="resultPanel">
+        <div class="text-center mb-4">
+            <div class="score-circle" id="scoreCircle">92</div>
+            <div class="text-lg font-semibold" id="scoreComment">非常棒！继续保持</div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>内容完整度</span>
+                <span id="completenessScore">95%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="completenessFill" style="width: 95%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>表达准确度</span>
+                <span id="accuracyScore">90%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="accuracyFill" style="width: 90%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>逻辑连贯性</span>
+                <span id="logicScore">92%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="logicFill" style="width: 92%"></div>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">详细分析</h3>
+            <p class="text-gray-600 text-sm" id="analysisIntro">您的背诵内容基本完整，重点内容把握准确。以下是具体分析：</p>
+            <ul class="text-sm text-gray-600 mt-2 space-y-2" id="analysisDetails">
+                <li>✓ 完整复述了马克思主义哲学的基本原理</li>
+                <li>✓ 准确把握了"实践"与"认识"的辩证关系</li>
+                <li>⚠️ "<span class="diff-text">实践是检验真理的唯一标准</span>" 应为 "<span class="highlight">实践是检验真理的根本标准</span>"</li>
+                <li>💡 建议加强对以下概念的理解：
+                    <ul class="ml-4 mt-1 list-disc">
+                        <li>实践与认识的关系</li>
+                        <li>真理的绝对性与相对性</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">记忆曲线分析</h3>
+            <p class="text-gray-600 text-sm">根据您的背诵历史，我们分析了您的记忆曲线：</p>
+            <div class="h-32 bg-white rounded-lg mt-3 p-2 flex items-end justify-between">
+                <div class="h-3/4 w-8 bg-green-100 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">首次</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">85%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-green-200 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">1天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">88%</span>
+                </div>
+                <div class="h-11/12 w-8 bg-green-300 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">3天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">92%</span>
+                </div>
+                <div class="h-full w-8 bg-green-400 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">7天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">95%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-gray-200 rounded-t-md relative border-2 border-dashed border-gray-400">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">14天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">预测</span>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-8 text-center">建议在7天后进行下一次复习，以巩固记忆</p>
+        </div>
+        <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold" onclick="closeResultPanel()">
+            继续背诵
+        </button>
+    </div>
+
+    <!-- 使用说明弹窗 -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-content">
+            <h2 class="text-xl font-bold mb-4">如何使用背诵比对</h2>
+            <div class="tutorial-step">
+                <div class="step-number">1</div>
+                <div>
+                    <h3 class="font-semibold mb-1">输入正确内容</h3>
+                    <p class="text-sm text-gray-600">在上方输入框中输入要背诵的内容，可以直接输入、拍照或从相册选择</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">2</div>
+                <div>
+                    <h3 class="font-semibold mb-1">提交背诵内容</h3>
+                    <p class="text-sm text-gray-600">按住录音按钮开始录制您的背诵内容，松开按钮结束录制</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">3</div>
+                <div>
+                    <h3 class="font-semibold mb-1">查看分析结果</h3>
+                    <p class="text-sm text-gray-600">系统会自动分析您的背诵内容，并给出详细的评分和改进建议</p>
+                </div>
+            </div>
+            <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold mt-4" onclick="closeTutorial()">
+                知道了
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let recordingTimer;
+        let startTime;
+        const recordBtn = document.getElementById('recordBtn');
+        const resultPanel = document.getElementById('resultPanel');
+        const timerDisplay = document.getElementById('recordingTimer');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const correctVersion = document.getElementById('correctVersion');
+        const reciteVersion = document.getElementById('reciteVersion');
+        const exampleSelector = document.getElementById('exampleSelector');
+
+        // 示例内容
+        const exampleContents = {
+            philosophy: {
+                correct: `马克思主义认识论认为：实践是认识的来源。认识的过程是一个实践、认识、再实践、再认识的循环上升过程。实践是检验真理的根本标准。
+
+真理具有客观性，同时具有绝对性和相对性的统一。认识的规律是由感性认识到理性认识，再由理性认识到实践的飞跃。`,
+                recite: `马克思主义认识论认为实践是认识的来源。认识的过程是实践、认识、再实践、再认识的循环上升过程。实践是检验真理的唯一标准。
+
+真理具有客观性，具有绝对性和相对性的统一特征。认识规律是从感性认识到理性认识，再从理性认识到实践的飞跃。`,
+                analysis: {
+                    score: 92,
+                    comment: "非常棒！继续保持",
+                    completeness: 95,
+                    accuracy: 90,
+                    logic: 92,
+                    intro: "您的背诵内容基本完整，重点内容把握准确。以下是具体分析：",
+                    details: [
+                        "✓ 完整复述了马克思主义哲学的基本原理",
+                        "✓ 准确把握了"实践"与"认识"的辩证关系",
+                        "⚠️ \"<span class=\"diff-text\">实践是检验真理的唯一标准</span>\" 应为 \"<span class=\"highlight\">实践是检验真理的根本标准</span>\"",
+                        "💡 建议加强对以下概念的理解：<ul class=\"ml-4 mt-1 list-disc\"><li>实践与认识的关系</li><li>真理的绝对性与相对性</li></ul>"
+                    ]
+                }
+            },
+            politics: {
+                correct: `商品是用来交换的劳动产品。商品具有使用价值和价值两个因素。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性。价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的二因素反映了生产商品的劳动的二重性：具体劳动和抽象劳动。具体劳动创造使用价值，抽象劳动形成价值。`,
+                recite: `商品是用来交换的劳动产品，具有使用价值和价值两个基本属性。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性；价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的两个基本属性反映了生产商品的劳动的二重性：具体劳动创造使用价值，抽象劳动形成价值。`,
+                analysis: {
+                    score: 94,
+                    comment: "出色的表现！",
+                    completeness: 96,
+                    accuracy: 94,
+                    logic: 93,
+                    intro: "您对政治经济学核心概念的理解非常到位，表述清晰准确：",
+                    details: [
+                        "✓ 准确描述了商品的定义和基本属性",
+                        "✓ 正确区分了使用价值和价值的本质区别",
+                        "✓ 清晰阐述了具体劳动和抽象劳动的关系",
+                        "⚠️ \"<span class=\"diff-text\">两个基本属性</span>\" 表述不够准确，应为 \"<span class=\"highlight\">二因素</span>\"",
+                        "💡 建议进一步理解：<ul class=\"ml-4 mt-1 list-disc\"><li>价值形式的发展</li><li>商品拜物教的本质</li></ul>"
+                    ]
+                }
+            },
+            history: {
+                correct: `新民主主义革命是无产阶级领导的，人民大众的，反对帝国主义、封建主义和官僚资本主义的革命。其基本内容是：没收官僚资本，没收地主阶级的土地归农民所有，保护民族工商业。
+
+新民主主义革命的动力是工人阶级、农民阶级、城市小资产阶级和民族资产阶级。其领导力量是工人阶级及其政党——中国共产党。`,
+                recite: `
+```
+</file>
+```
+</file>
+
+<edit_instructions>
+<message_from_colleague>
+调整背诵比对页面的布局，减小两个输入框的高度，并确保开始比对按钮在不滚动的情况下可见
+
+```pages/recite.html
+<code_block_to_apply_changes_from>
+        .input-area {
+            min-height: 140px; /* 减小高度 */
+            max-height: 180px; /* 添加最大高度 */
+            overflow-y: auto; /* 添加滚动条 */
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        // ... existing code ...
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        // ... existing code ...
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto; /* 减小边距 */
+            }
+            
+            .input-area {
+                min-height: 120px; /* 在小屏幕上进一步减小高度 */
+            }
+        }
+</code_block_to_apply_changes_from>
+</edit_instructions>
+
+
+Assistant:<rewritten_file>
+```
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>背诵比对 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .content-box {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin: 16px auto;
+            overflow: hidden;
+            padding: 0;
+            max-width: 92%;
+            width: 100%;
+        }
+
+        .dark-mode .content-box {
+            background: #1c1c1e;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .box-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .input-area {
+            min-height: 140px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            border-top: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+
+        .upload-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #ebebeb;
+        }
+
+        .voice-record-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ff2442;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .voice-record-btn::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #ff2442;
+            opacity: 0.3;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .voice-record-btn.recording::before {
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-record-btn.recording {
+            background: #e61e3c;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .result-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .result-panel.show {
+            transform: translateY(0);
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid #ff2442;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff2442;
+            margin: 0 auto 16px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #ff2442;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .example-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #f5f5f5;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .example-btn:hover, .example-btn:active {
+            background: #ebebeb;
+            transform: scale(1.05);
+        }
+
+        .recording-timer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .recording-timer.show {
+            display: block;
+        }
+
+        .highlight {
+            background: #fff3f5;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+
+        .diff-text {
+            color: #ff2442;
+            text-decoration: line-through;
+        }
+
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tutorial-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .tutorial-content {
+            background: white;
+            width: 90%;
+            max-width: 360px;
+            margin: auto;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .tutorial-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: #ff2442;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto;
+            }
+            
+            .input-area {
+                min-height: 120px;
+            }
+        }
+
+        /* 添加示例选择器样式 */
+        .example-selector {
+            position: absolute;
+            top: 50px;
+            right: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 12px;
+            z-index: 100;
+            width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .example-selector.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .example-item {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .example-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .example-item:hover {
+            background: #f5f5f5;
+        }
+
+        .example-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .example-item-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        @media (min-width: 768px) {
+            .cards-container {
+                padding: 0 24px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200">
+        <div class="flex items-center">
+            <button onclick="history.back()" class="mr-4" title="返回">
+                <i class="fas fa-arrow-left text-xl text-gray-600"></i>
+            </button>
+            <h1 class="text-lg font-semibold">背诵比对</h1>
+            <button class="ml-auto text-sm text-gray-500" onclick="showTutorial()">
+                <i class="fas fa-question-circle mr-1"></i>
+                使用说明
+            </button>
+        </div>
+    </div>
+
+    <!-- 卡片容器 -->
+    <div class="cards-container">
+        <!-- 正确版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">正确版本</span>
+                <span class="text-sm text-gray-500">请输入要背诵的内容</span>
+                <button class="example-btn" onclick="toggleExampleSelector()">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>加载示例</span>
+                </button>
+                <div class="example-selector" id="exampleSelector">
+                    <div class="example-item" onclick="loadExample('philosophy')">
+                        <div class="example-item-title">马克思主义哲学</div>
+                        <div class="example-item-desc">认识论基本原理</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('politics')">
+                        <div class="example-item-title">政治经济学</div>
+                        <div class="example-item-desc">商品的二因素</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('history')">
+                        <div class="example-item-title">中国近代史</div>
+                        <div class="example-item-desc">新民主主义革命</div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area" id="correctVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'correct')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'correct')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 背诵版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">背诵版本</span>
+                <span class="text-sm text-gray-500">请提交您的背诵内容</span>
+            </div>
+            <div class="input-area" id="reciteVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'recite')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'recite')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+                <button class="voice-record-btn" id="recordBtn" title="语音录制">
+                    <i class="fas fa-microphone"></i>
+                    <span class="recording-timer" id="recordingTimer">00:00</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 比对按钮 -->
+        <button class="compare-btn" id="compareBtn" onclick="startCompare()">
+            开始比对
+        </button>
+    </div>
+
+    <!-- 比对结果面板 -->
+    <div class="result-panel" id="resultPanel">
+        <div class="text-center mb-4">
+            <div class="score-circle" id="scoreCircle">92</div>
+            <div class="text-lg font-semibold" id="scoreComment">非常棒！继续保持</div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>内容完整度</span>
+                <span id="completenessScore">95%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="completenessFill" style="width: 95%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>表达准确度</span>
+                <span id="accuracyScore">90%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="accuracyFill" style="width: 90%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>逻辑连贯性</span>
+                <span id="logicScore">92%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="logicFill" style="width: 92%"></div>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">详细分析</h3>
+            <p class="text-gray-600 text-sm" id="analysisIntro">您的背诵内容基本完整，重点内容把握准确。以下是具体分析：</p>
+            <ul class="text-sm text-gray-600 mt-2 space-y-2" id="analysisDetails">
+                <li>✓ 完整复述了马克思主义哲学的基本原理</li>
+                <li>✓ 准确把握了"实践"与"认识"的辩证关系</li>
+                <li>⚠️ "<span class="diff-text">实践是检验真理的唯一标准</span>" 应为 "<span class="highlight">实践是检验真理的根本标准</span>"</li>
+                <li>💡 建议加强对以下概念的理解：
+                    <ul class="ml-4 mt-1 list-disc">
+                        <li>实践与认识的关系</li>
+                        <li>真理的绝对性与相对性</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">记忆曲线分析</h3>
+            <p class="text-gray-600 text-sm">根据您的背诵历史，我们分析了您的记忆曲线：</p>
+            <div class="h-32 bg-white rounded-lg mt-3 p-2 flex items-end justify-between">
+                <div class="h-3/4 w-8 bg-green-100 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">首次</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">85%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-green-200 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">1天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">88%</span>
+                </div>
+                <div class="h-11/12 w-8 bg-green-300 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">3天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">92%</span>
+                </div>
+                <div class="h-full w-8 bg-green-400 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">7天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">95%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-gray-200 rounded-t-md relative border-2 border-dashed border-gray-400">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">14天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">预测</span>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-8 text-center">建议在7天后进行下一次复习，以巩固记忆</p>
+        </div>
+        <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold" onclick="closeResultPanel()">
+            继续背诵
+        </button>
+    </div>
+
+    <!-- 使用说明弹窗 -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-content">
+            <h2 class="text-xl font-bold mb-4">如何使用背诵比对</h2>
+            <div class="tutorial-step">
+                <div class="step-number">1</div>
+                <div>
+                    <h3 class="font-semibold mb-1">输入正确内容</h3>
+                    <p class="text-sm text-gray-600">在上方输入框中输入要背诵的内容，可以直接输入、拍照或从相册选择</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">2</div>
+                <div>
+                    <h3 class="font-semibold mb-1">提交背诵内容</h3>
+                    <p class="text-sm text-gray-600">按住录音按钮开始录制您的背诵内容，松开按钮结束录制</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">3</div>
+                <div>
+                    <h3 class="font-semibold mb-1">查看分析结果</h3>
+                    <p class="text-sm text-gray-600">系统会自动分析您的背诵内容，并给出详细的评分和改进建议</p>
+                </div>
+            </div>
+            <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold mt-4" onclick="closeTutorial()">
+                知道了
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let recordingTimer;
+        let startTime;
+        const recordBtn = document.getElementById('recordBtn');
+        const resultPanel = document.getElementById('resultPanel');
+        const timerDisplay = document.getElementById('recordingTimer');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const correctVersion = document.getElementById('correctVersion');
+        const reciteVersion = document.getElementById('reciteVersion');
+        const exampleSelector = document.getElementById('exampleSelector');
+
+        // 示例内容
+        const exampleContents = {
+            philosophy: {
+                correct: `马克思主义认识论认为：实践是认识的来源。认识的过程是一个实践、认识、再实践、再认识的循环上升过程。实践是检验真理的根本标准。
+
+真理具有客观性，同时具有绝对性和相对性的统一。认识的规律是由感性认识到理性认识，再由理性认识到实践的飞跃。`,
+                recite: `马克思主义认识论认为实践是认识的来源。认识的过程是实践、认识、再实践、再认识的循环上升过程。实践是检验真理的唯一标准。
+
+真理具有客观性，具有绝对性和相对性的统一特征。认识规律是从感性认识到理性认识，再从理性认识到实践的飞跃。`,
+                analysis: {
+                    score: 92,
+                    comment: "非常棒！继续保持",
+                    completeness: 95,
+                    accuracy: 90,
+                    logic: 92,
+                    intro: "您的背诵内容基本完整，重点内容把握准确。以下是具体分析：",
+                    details: [
+                        "✓ 完整复述了马克思主义哲学的基本原理",
+                        "✓ 准确把握了"实践"与"认识"的辩证关系",
+                        "⚠️ \"<span class=\"diff-text\">实践是检验真理的唯一标准</span>\" 应为 \"<span class=\"highlight\">实践是检验真理的根本标准</span>\"",
+                        "💡 建议加强对以下概念的理解：<ul class=\"ml-4 mt-1 list-disc\"><li>实践与认识的关系</li><li>真理的绝对性与相对性</li></ul>"
+                    ]
+                }
+            },
+            politics: {
+                correct: `商品是用来交换的劳动产品。商品具有使用价值和价值两个因素。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性。价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的二因素反映了生产商品的劳动的二重性：具体劳动和抽象劳动。具体劳动创造使用价值，抽象劳动形成价值。`,
+                recite: `商品是用来交换的劳动产品，具有使用价值和价值两个基本属性。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性；价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的两个基本属性反映了生产商品的劳动的二重性：具体劳动创造使用价值，抽象劳动形成价值。`,
+                analysis: {
+                    score: 94,
+                    comment: "出色的表现！",
+                    completeness: 96,
+                    accuracy: 94,
+                    logic: 93,
+                    intro: "您对政治经济学核心概念的理解非常到位，表述清晰准确：",
+                    details: [
+                        "✓ 准确描述了商品的定义和基本属性",
+                        "✓ 正确区分了使用价值和价值的本质区别",
+                        "✓ 清晰阐述了具体劳动和抽象劳动的关系",
+                        "⚠️ \"<span class=\"diff-text\">两个基本属性</span>\" 表述不够准确，应为 \"<span class=\"highlight\">二因素</span>\"",
+                        "💡 建议进一步理解：<ul class=\"ml-4 mt-1 list-disc\"><li>价值形式的发展</li><li>商品拜物教的本质</li></ul>"
+                    ]
+                }
+            },
+            history: {
+                correct: `新民主主义革命是无产阶级领导的，人民大众的，反对帝国主义、封建主义和官僚资本主义的革命。其基本内容是：没收官僚资本，没收地主阶级的土地归农民所有，保护民族工商业。
+
+新民主主义革命的动力是工人阶级、农民阶级、城市小资产阶级和民族资产阶级。其领导力量是工人阶级及其政党——中国共产党。`,
+                recite: `
+```
+</file>
+```
+</file>
+
+<edit_instructions>
+<message_from_colleague>
+调整背诵比对页面的布局，减小两个输入框的高度，并确保开始比对按钮在不滚动的情况下可见
+
+```pages/recite.html
+<code_block_to_apply_changes_from>
+        .input-area {
+            min-height: 140px; /* 减小高度 */
+            max-height: 180px; /* 添加最大高度 */
+            overflow-y: auto; /* 添加滚动条 */
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        // ... existing code ...
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        // ... existing code ...
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto; /* 减小边距 */
+            }
+            
+            .input-area {
+                min-height: 120px; /* 在小屏幕上进一步减小高度 */
+            }
+        }
+</code_block_to_apply_changes_from>
+</edit_instructions>
+
+
+Assistant:<rewritten_file>
+```
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>背诵比对 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .content-box {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin: 16px auto;
+            overflow: hidden;
+            padding: 0;
+            max-width: 92%;
+            width: 100%;
+        }
+
+        .dark-mode .content-box {
+            background: #1c1c1e;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .box-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .input-area {
+            min-height: 140px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            border-top: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+
+        .upload-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #ebebeb;
+        }
+
+        .voice-record-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ff2442;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .voice-record-btn::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #ff2442;
+            opacity: 0.3;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .voice-record-btn.recording::before {
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-record-btn.recording {
+            background: #e61e3c;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .result-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .result-panel.show {
+            transform: translateY(0);
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid #ff2442;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff2442;
+            margin: 0 auto 16px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #ff2442;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .example-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #f5f5f5;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .example-btn:hover, .example-btn:active {
+            background: #ebebeb;
+            transform: scale(1.05);
+        }
+
+        .recording-timer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .recording-timer.show {
+            display: block;
+        }
+
+        .highlight {
+            background: #fff3f5;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+
+        .diff-text {
+            color: #ff2442;
+            text-decoration: line-through;
+        }
+
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tutorial-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .tutorial-content {
+            background: white;
+            width: 90%;
+            max-width: 360px;
+            margin: auto;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .tutorial-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: #ff2442;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto;
+            }
+            
+            .input-area {
+                min-height: 120px;
+            }
+        }
+
+        /* 添加示例选择器样式 */
+        .example-selector {
+            position: absolute;
+            top: 50px;
+            right: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 12px;
+            z-index: 100;
+            width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .example-selector.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .example-item {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .example-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .example-item:hover {
+            background: #f5f5f5;
+        }
+
+        .example-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .example-item-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        @media (min-width: 768px) {
+            .cards-container {
+                padding: 0 24px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200">
+        <div class="flex items-center">
+            <button onclick="history.back()" class="mr-4" title="返回">
+                <i class="fas fa-arrow-left text-xl text-gray-600"></i>
+            </button>
+            <h1 class="text-lg font-semibold">背诵比对</h1>
+            <button class="ml-auto text-sm text-gray-500" onclick="showTutorial()">
+                <i class="fas fa-question-circle mr-1"></i>
+                使用说明
+            </button>
+        </div>
+    </div>
+
+    <!-- 卡片容器 -->
+    <div class="cards-container">
+        <!-- 正确版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">正确版本</span>
+                <span class="text-sm text-gray-500">请输入要背诵的内容</span>
+                <button class="example-btn" onclick="toggleExampleSelector()">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>加载示例</span>
+                </button>
+                <div class="example-selector" id="exampleSelector">
+                    <div class="example-item" onclick="loadExample('philosophy')">
+                        <div class="example-item-title">马克思主义哲学</div>
+                        <div class="example-item-desc">认识论基本原理</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('politics')">
+                        <div class="example-item-title">政治经济学</div>
+                        <div class="example-item-desc">商品的二因素</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('history')">
+                        <div class="example-item-title">中国近代史</div>
+                        <div class="example-item-desc">新民主主义革命</div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area" id="correctVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'correct')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'correct')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 背诵版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">背诵版本</span>
+                <span class="text-sm text-gray-500">请提交您的背诵内容</span>
+            </div>
+            <div class="input-area" id="reciteVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'recite')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'recite')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+                <button class="voice-record-btn" id="recordBtn" title="语音录制">
+                    <i class="fas fa-microphone"></i>
+                    <span class="recording-timer" id="recordingTimer">00:00</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 比对按钮 -->
+        <button class="compare-btn" id="compareBtn" onclick="startCompare()">
+            开始比对
+        </button>
+    </div>
+
+    <!-- 比对结果面板 -->
+    <div class="result-panel" id="resultPanel">
+        <div class="text-center mb-4">
+            <div class="score-circle" id="scoreCircle">92</div>
+            <div class="text-lg font-semibold" id="scoreComment">非常棒！继续保持</div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>内容完整度</span>
+                <span id="completenessScore">95%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="completenessFill" style="width: 95%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>表达准确度</span>
+                <span id="accuracyScore">90%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="accuracyFill" style="width: 90%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>逻辑连贯性</span>
+                <span id="logicScore">92%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="logicFill" style="width: 92%"></div>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">详细分析</h3>
+            <p class="text-gray-600 text-sm" id="analysisIntro">您的背诵内容基本完整，重点内容把握准确。以下是具体分析：</p>
+            <ul class="text-sm text-gray-600 mt-2 space-y-2" id="analysisDetails">
+                <li>✓ 完整复述了马克思主义哲学的基本原理</li>
+                <li>✓ 准确把握了"实践"与"认识"的辩证关系</li>
+                <li>⚠️ "<span class="diff-text">实践是检验真理的唯一标准</span>" 应为 "<span class="highlight">实践是检验真理的根本标准</span>"</li>
+                <li>💡 建议加强对以下概念的理解：
+                    <ul class="ml-4 mt-1 list-disc">
+                        <li>实践与认识的关系</li>
+                        <li>真理的绝对性与相对性</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">记忆曲线分析</h3>
+            <p class="text-gray-600 text-sm">根据您的背诵历史，我们分析了您的记忆曲线：</p>
+            <div class="h-32 bg-white rounded-lg mt-3 p-2 flex items-end justify-between">
+                <div class="h-3/4 w-8 bg-green-100 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">首次</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">85%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-green-200 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">1天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">88%</span>
+                </div>
+                <div class="h-11/12 w-8 bg-green-300 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">3天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">92%</span>
+                </div>
+                <div class="h-full w-8 bg-green-400 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">7天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">95%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-gray-200 rounded-t-md relative border-2 border-dashed border-gray-400">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">14天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">预测</span>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-8 text-center">建议在7天后进行下一次复习，以巩固记忆</p>
+        </div>
+        <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold" onclick="closeResultPanel()">
+            继续背诵
+        </button>
+    </div>
+
+    <!-- 使用说明弹窗 -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-content">
+            <h2 class="text-xl font-bold mb-4">如何使用背诵比对</h2>
+            <div class="tutorial-step">
+                <div class="step-number">1</div>
+                <div>
+                    <h3 class="font-semibold mb-1">输入正确内容</h3>
+                    <p class="text-sm text-gray-600">在上方输入框中输入要背诵的内容，可以直接输入、拍照或从相册选择</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">2</div>
+                <div>
+                    <h3 class="font-semibold mb-1">提交背诵内容</h3>
+                    <p class="text-sm text-gray-600">按住录音按钮开始录制您的背诵内容，松开按钮结束录制</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">3</div>
+                <div>
+                    <h3 class="font-semibold mb-1">查看分析结果</h3>
+                    <p class="text-sm text-gray-600">系统会自动分析您的背诵内容，并给出详细的评分和改进建议</p>
+                </div>
+            </div>
+            <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold mt-4" onclick="closeTutorial()">
+                知道了
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let recordingTimer;
+        let startTime;
+        const recordBtn = document.getElementById('recordBtn');
+        const resultPanel = document.getElementById('resultPanel');
+        const timerDisplay = document.getElementById('recordingTimer');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const correctVersion = document.getElementById('correctVersion');
+        const reciteVersion = document.getElementById('reciteVersion');
+        const exampleSelector = document.getElementById('exampleSelector');
+
+        // 示例内容
+        const exampleContents = {
+            philosophy: {
+                correct: `马克思主义认识论认为：实践是认识的来源。认识的过程是一个实践、认识、再实践、再认识的循环上升过程。实践是检验真理的根本标准。
+
+真理具有客观性，同时具有绝对性和相对性的统一。认识的规律是由感性认识到理性认识，再由理性认识到实践的飞跃。`,
+                recite: `马克思主义认识论认为实践是认识的来源。认识的过程是实践、认识、再实践、再认识的循环上升过程。实践是检验真理的唯一标准。
+
+真理具有客观性，具有绝对性和相对性的统一特征。认识规律是从感性认识到理性认识，再从理性认识到实践的飞跃。`,
+                analysis: {
+                    score: 92,
+                    comment: "非常棒！继续保持",
+                    completeness: 95,
+                    accuracy: 90,
+                    logic: 92,
+                    intro: "您的背诵内容基本完整，重点内容把握准确。以下是具体分析：",
+                    details: [
+                        "✓ 完整复述了马克思主义哲学的基本原理",
+                        "✓ 准确把握了"实践"与"认识"的辩证关系",
+                        "⚠️ \"<span class=\"diff-text\">实践是检验真理的唯一标准</span>\" 应为 \"<span class=\"highlight\">实践是检验真理的根本标准</span>\"",
+                        "💡 建议加强对以下概念的理解：<ul class=\"ml-4 mt-1 list-disc\"><li>实践与认识的关系</li><li>真理的绝对性与相对性</li></ul>"
+                    ]
+                }
+            },
+            politics: {
+                correct: `商品是用来交换的劳动产品。商品具有使用价值和价值两个因素。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性。价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的二因素反映了生产商品的劳动的二重性：具体劳动和抽象劳动。具体劳动创造使用价值，抽象劳动形成价值。`,
+                recite: `商品是用来交换的劳动产品，具有使用价值和价值两个基本属性。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性；价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的两个基本属性反映了生产商品的劳动的二重性：具体劳动创造使用价值，抽象劳动形成价值。`,
+                analysis: {
+                    score: 94,
+                    comment: "出色的表现！",
+                    completeness: 96,
+                    accuracy: 94,
+                    logic: 93,
+                    intro: "您对政治经济学核心概念的理解非常到位，表述清晰准确：",
+                    details: [
+                        "✓ 准确描述了商品的定义和基本属性",
+                        "✓ 正确区分了使用价值和价值的本质区别",
+                        "✓ 清晰阐述了具体劳动和抽象劳动的关系",
+                        "⚠️ \"<span class=\"diff-text\">两个基本属性</span>\" 表述不够准确，应为 \"<span class=\"highlight\">二因素</span>\"",
+                        "💡 建议进一步理解：<ul class=\"ml-4 mt-1 list-disc\"><li>价值形式的发展</li><li>商品拜物教的本质</li></ul>"
+                    ]
+                }
+            },
+            history: {
+                correct: `新民主主义革命是无产阶级领导的，人民大众的，反对帝国主义、封建主义和官僚资本主义的革命。其基本内容是：没收官僚资本，没收地主阶级的土地归农民所有，保护民族工商业。
+
+新民主主义革命的动力是工人阶级、农民阶级、城市小资产阶级和民族资产阶级。其领导力量是工人阶级及其政党——中国共产党。`,
+                recite: `
+```
+</file>
+```
+</file>
+
+<edit_instructions>
+<message_from_colleague>
+调整背诵比对页面的布局，减小两个输入框的高度，并确保开始比对按钮在不滚动的情况下可见
+
+```pages/recite.html
+<code_block_to_apply_changes_from>
+        .input-area {
+            min-height: 140px; /* 减小高度 */
+            max-height: 180px; /* 添加最大高度 */
+            overflow-y: auto; /* 添加滚动条 */
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        // ... existing code ...
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        // ... existing code ...
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto; /* 减小边距 */
+            }
+            
+            .input-area {
+                min-height: 120px; /* 在小屏幕上进一步减小高度 */
+            }
+        }
+</code_block_to_apply_changes_from>
+</edit_instructions>
+
+
+Assistant:<rewritten_file>
+```
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>背诵比对 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .content-box {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin: 16px auto;
+            overflow: hidden;
+            padding: 0;
+            max-width: 92%;
+            width: 100%;
+        }
+
+        .dark-mode .content-box {
+            background: #1c1c1e;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .box-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .input-area {
+            min-height: 140px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            border-top: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+
+        .upload-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #ebebeb;
+        }
+
+        .voice-record-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ff2442;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .voice-record-btn::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #ff2442;
+            opacity: 0.3;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .voice-record-btn.recording::before {
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-record-btn.recording {
+            background: #e61e3c;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .result-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .result-panel.show {
+            transform: translateY(0);
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid #ff2442;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff2442;
+            margin: 0 auto 16px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #ff2442;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .example-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #f5f5f5;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .example-btn:hover, .example-btn:active {
+            background: #ebebeb;
+            transform: scale(1.05);
+        }
+
+        .recording-timer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .recording-timer.show {
+            display: block;
+        }
+
+        .highlight {
+            background: #fff3f5;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+
+        .diff-text {
+            color: #ff2442;
+            text-decoration: line-through;
+        }
+
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tutorial-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .tutorial-content {
+            background: white;
+            width: 90%;
+            max-width: 360px;
+            margin: auto;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .tutorial-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: #ff2442;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto;
+            }
+            
+            .input-area {
+                min-height: 120px;
+            }
+        }
+
+        /* 添加示例选择器样式 */
+        .example-selector {
+            position: absolute;
+            top: 50px;
+            right: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 12px;
+            z-index: 100;
+            width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .example-selector.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .example-item {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .example-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .example-item:hover {
+            background: #f5f5f5;
+        }
+
+        .example-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .example-item-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        @media (min-width: 768px) {
+            .cards-container {
+                padding: 0 24px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200">
+        <div class="flex items-center">
+            <button onclick="history.back()" class="mr-4" title="返回">
+                <i class="fas fa-arrow-left text-xl text-gray-600"></i>
+            </button>
+            <h1 class="text-lg font-semibold">背诵比对</h1>
+            <button class="ml-auto text-sm text-gray-500" onclick="showTutorial()">
+                <i class="fas fa-question-circle mr-1"></i>
+                使用说明
+            </button>
+        </div>
+    </div>
+
+    <!-- 卡片容器 -->
+    <div class="cards-container">
+        <!-- 正确版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">正确版本</span>
+                <span class="text-sm text-gray-500">请输入要背诵的内容</span>
+                <button class="example-btn" onclick="toggleExampleSelector()">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>加载示例</span>
+                </button>
+                <div class="example-selector" id="exampleSelector">
+                    <div class="example-item" onclick="loadExample('philosophy')">
+                        <div class="example-item-title">马克思主义哲学</div>
+                        <div class="example-item-desc">认识论基本原理</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('politics')">
+                        <div class="example-item-title">政治经济学</div>
+                        <div class="example-item-desc">商品的二因素</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('history')">
+                        <div class="example-item-title">中国近代史</div>
+                        <div class="example-item-desc">新民主主义革命</div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area" id="correctVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'correct')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'correct')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 背诵版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">背诵版本</span>
+                <span class="text-sm text-gray-500">请提交您的背诵内容</span>
+            </div>
+            <div class="input-area" id="reciteVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'recite')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'recite')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+                <button class="voice-record-btn" id="recordBtn" title="语音录制">
+                    <i class="fas fa-microphone"></i>
+                    <span class="recording-timer" id="recordingTimer">00:00</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 比对按钮 -->
+        <button class="compare-btn" id="compareBtn" onclick="startCompare()">
+            开始比对
+        </button>
+    </div>
+
+    <!-- 比对结果面板 -->
+    <div class="result-panel" id="resultPanel">
+        <div class="text-center mb-4">
+            <div class="score-circle" id="scoreCircle">92</div>
+            <div class="text-lg font-semibold" id="scoreComment">非常棒！继续保持</div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>内容完整度</span>
+                <span id="completenessScore">95%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="completenessFill" style="width: 95%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>表达准确度</span>
+                <span id="accuracyScore">90%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="accuracyFill" style="width: 90%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>逻辑连贯性</span>
+                <span id="logicScore">92%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="logicFill" style="width: 92%"></div>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">详细分析</h3>
+            <p class="text-gray-600 text-sm" id="analysisIntro">您的背诵内容基本完整，重点内容把握准确。以下是具体分析：</p>
+            <ul class="text-sm text-gray-600 mt-2 space-y-2" id="analysisDetails">
+                <li>✓ 完整复述了马克思主义哲学的基本原理</li>
+                <li>✓ 准确把握了"实践"与"认识"的辩证关系</li>
+                <li>⚠️ "<span class="diff-text">实践是检验真理的唯一标准</span>" 应为 "<span class="highlight">实践是检验真理的根本标准</span>"</li>
+                <li>💡 建议加强对以下概念的理解：
+                    <ul class="ml-4 mt-1 list-disc">
+                        <li>实践与认识的关系</li>
+                        <li>真理的绝对性与相对性</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">记忆曲线分析</h3>
+            <p class="text-gray-600 text-sm">根据您的背诵历史，我们分析了您的记忆曲线：</p>
+            <div class="h-32 bg-white rounded-lg mt-3 p-2 flex items-end justify-between">
+                <div class="h-3/4 w-8 bg-green-100 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">首次</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">85%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-green-200 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">1天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">88%</span>
+                </div>
+                <div class="h-11/12 w-8 bg-green-300 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">3天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">92%</span>
+                </div>
+                <div class="h-full w-8 bg-green-400 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">7天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">95%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-gray-200 rounded-t-md relative border-2 border-dashed border-gray-400">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">14天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">预测</span>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-8 text-center">建议在7天后进行下一次复习，以巩固记忆</p>
+        </div>
+        <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold" onclick="closeResultPanel()">
+            继续背诵
+        </button>
+    </div>
+
+    <!-- 使用说明弹窗 -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-content">
+            <h2 class="text-xl font-bold mb-4">如何使用背诵比对</h2>
+            <div class="tutorial-step">
+                <div class="step-number">1</div>
+                <div>
+                    <h3 class="font-semibold mb-1">输入正确内容</h3>
+                    <p class="text-sm text-gray-600">在上方输入框中输入要背诵的内容，可以直接输入、拍照或从相册选择</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">2</div>
+                <div>
+                    <h3 class="font-semibold mb-1">提交背诵内容</h3>
+                    <p class="text-sm text-gray-600">按住录音按钮开始录制您的背诵内容，松开按钮结束录制</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">3</div>
+                <div>
+                    <h3 class="font-semibold mb-1">查看分析结果</h3>
+                    <p class="text-sm text-gray-600">系统会自动分析您的背诵内容，并给出详细的评分和改进建议</p>
+                </div>
+            </div>
+            <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold mt-4" onclick="closeTutorial()">
+                知道了
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let recordingTimer;
+        let startTime;
+        const recordBtn = document.getElementById('recordBtn');
+        const resultPanel = document.getElementById('resultPanel');
+        const timerDisplay = document.getElementById('recordingTimer');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const correctVersion = document.getElementById('correctVersion');
+        const reciteVersion = document.getElementById('reciteVersion');
+        const exampleSelector = document.getElementById('exampleSelector');
+
+        // 示例内容
+        const exampleContents = {
+            philosophy: {
+                correct: `马克思主义认识论认为：实践是认识的来源。认识的过程是一个实践、认识、再实践、再认识的循环上升过程。实践是检验真理的根本标准。
+
+真理具有客观性，同时具有绝对性和相对性的统一。认识的规律是由感性认识到理性认识，再由理性认识到实践的飞跃。`,
+                recite: `马克思主义认识论认为实践是认识的来源。认识的过程是实践、认识、再实践、再认识的循环上升过程。实践是检验真理的唯一标准。
+
+真理具有客观性，具有绝对性和相对性的统一特征。认识规律是从感性认识到理性认识，再从理性认识到实践的飞跃。`,
+                analysis: {
+                    score: 92,
+                    comment: "非常棒！继续保持",
+                    completeness: 95,
+                    accuracy: 90,
+                    logic: 92,
+                    intro: "您的背诵内容基本完整，重点内容把握准确。以下是具体分析：",
+                    details: [
+                        "✓ 完整复述了马克思主义哲学的基本原理",
+                        "✓ 准确把握了"实践"与"认识"的辩证关系",
+                        "⚠️ \"<span class=\"diff-text\">实践是检验真理的唯一标准</span>\" 应为 \"<span class=\"highlight\">实践是检验真理的根本标准</span>\"",
+                        "💡 建议加强对以下概念的理解：<ul class=\"ml-4 mt-1 list-disc\"><li>实践与认识的关系</li><li>真理的绝对性与相对性</li></ul>"
+                    ]
+                }
+            },
+            politics: {
+                correct: `商品是用来交换的劳动产品。商品具有使用价值和价值两个因素。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性。价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的二因素反映了生产商品的劳动的二重性：具体劳动和抽象劳动。具体劳动创造使用价值，抽象劳动形成价值。`,
+                recite: `商品是用来交换的劳动产品，具有使用价值和价值两个基本属性。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性；价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的两个基本属性反映了生产商品的劳动的二重性：具体劳动创造使用价值，抽象劳动形成价值。`,
+                analysis: {
+                    score: 94,
+                    comment: "出色的表现！",
+                    completeness: 96,
+                    accuracy: 94,
+                    logic: 93,
+                    intro: "您对政治经济学核心概念的理解非常到位，表述清晰准确：",
+                    details: [
+                        "✓ 准确描述了商品的定义和基本属性",
+                        "✓ 正确区分了使用价值和价值的本质区别",
+                        "✓ 清晰阐述了具体劳动和抽象劳动的关系",
+                        "⚠️ \"<span class=\"diff-text\">两个基本属性</span>\" 表述不够准确，应为 \"<span class=\"highlight\">二因素</span>\"",
+                        "💡 建议进一步理解：<ul class=\"ml-4 mt-1 list-disc\"><li>价值形式的发展</li><li>商品拜物教的本质</li></ul>"
+                    ]
+                }
+            },
+            history: {
+                correct: `新民主主义革命是无产阶级领导的，人民大众的，反对帝国主义、封建主义和官僚资本主义的革命。其基本内容是：没收官僚资本，没收地主阶级的土地归农民所有，保护民族工商业。
+
+新民主主义革命的动力是工人阶级、农民阶级、城市小资产阶级和民族资产阶级。其领导力量是工人阶级及其政党——中国共产党。`,
+                recite: `
+```
+</file>
+```
+</file>
+
+<edit_instructions>
+<message_from_colleague>
+调整背诵比对页面的布局，减小两个输入框的高度，并确保开始比对按钮在不滚动的情况下可见
+
+```pages/recite.html
+<code_block_to_apply_changes_from>
+        .input-area {
+            min-height: 140px; /* 减小高度 */
+            max-height: 180px; /* 添加最大高度 */
+            overflow-y: auto; /* 添加滚动条 */
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        // ... existing code ...
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        // ... existing code ...
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto; /* 减小边距 */
+            }
+            
+            .input-area {
+                min-height: 120px; /* 在小屏幕上进一步减小高度 */
+            }
+        }
+</code_block_to_apply_changes_from>
+</edit_instructions>
+
+
+Assistant:<rewritten_file>
+```
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>背诵比对 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .content-box {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin: 16px auto;
+            overflow: hidden;
+            padding: 0;
+            max-width: 92%;
+            width: 100%;
+        }
+
+        .dark-mode .content-box {
+            background: #1c1c1e;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .box-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .input-area {
+            min-height: 140px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            border-top: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+
+        .upload-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #ebebeb;
+        }
+
+        .voice-record-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ff2442;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .voice-record-btn::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #ff2442;
+            opacity: 0.3;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .voice-record-btn.recording::before {
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-record-btn.recording {
+            background: #e61e3c;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .result-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .result-panel.show {
+            transform: translateY(0);
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid #ff2442;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff2442;
+            margin: 0 auto 16px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #ff2442;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .example-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #f5f5f5;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .example-btn:hover, .example-btn:active {
+            background: #ebebeb;
+            transform: scale(1.05);
+        }
+
+        .recording-timer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .recording-timer.show {
+            display: block;
+        }
+
+        .highlight {
+            background: #fff3f5;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+
+        .diff-text {
+            color: #ff2442;
+            text-decoration: line-through;
+        }
+
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tutorial-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .tutorial-content {
+            background: white;
+            width: 90%;
+            max-width: 360px;
+            margin: auto;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .tutorial-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: #ff2442;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto;
+            }
+            
+            .input-area {
+                min-height: 120px;
+            }
+        }
+
+        /* 添加示例选择器样式 */
+        .example-selector {
+            position: absolute;
+            top: 50px;
+            right: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 12px;
+            z-index: 100;
+            width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .example-selector.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .example-item {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .example-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .example-item:hover {
+            background: #f5f5f5;
+        }
+
+        .example-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .example-item-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        @media (min-width: 768px) {
+            .cards-container {
+                padding: 0 24px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200">
+        <div class="flex items-center">
+            <button onclick="history.back()" class="mr-4" title="返回">
+                <i class="fas fa-arrow-left text-xl text-gray-600"></i>
+            </button>
+            <h1 class="text-lg font-semibold">背诵比对</h1>
+            <button class="ml-auto text-sm text-gray-500" onclick="showTutorial()">
+                <i class="fas fa-question-circle mr-1"></i>
+                使用说明
+            </button>
+        </div>
+    </div>
+
+    <!-- 卡片容器 -->
+    <div class="cards-container">
+        <!-- 正确版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">正确版本</span>
+                <span class="text-sm text-gray-500">请输入要背诵的内容</span>
+                <button class="example-btn" onclick="toggleExampleSelector()">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>加载示例</span>
+                </button>
+                <div class="example-selector" id="exampleSelector">
+                    <div class="example-item" onclick="loadExample('philosophy')">
+                        <div class="example-item-title">马克思主义哲学</div>
+                        <div class="example-item-desc">认识论基本原理</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('politics')">
+                        <div class="example-item-title">政治经济学</div>
+                        <div class="example-item-desc">商品的二因素</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('history')">
+                        <div class="example-item-title">中国近代史</div>
+                        <div class="example-item-desc">新民主主义革命</div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area" id="correctVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'correct')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'correct')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 背诵版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">背诵版本</span>
+                <span class="text-sm text-gray-500">请提交您的背诵内容</span>
+            </div>
+            <div class="input-area" id="reciteVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'recite')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'recite')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+                <button class="voice-record-btn" id="recordBtn" title="语音录制">
+                    <i class="fas fa-microphone"></i>
+                    <span class="recording-timer" id="recordingTimer">00:00</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 比对按钮 -->
+        <button class="compare-btn" id="compareBtn" onclick="startCompare()">
+            开始比对
+        </button>
+    </div>
+
+    <!-- 比对结果面板 -->
+    <div class="result-panel" id="resultPanel">
+        <div class="text-center mb-4">
+            <div class="score-circle" id="scoreCircle">92</div>
+            <div class="text-lg font-semibold" id="scoreComment">非常棒！继续保持</div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>内容完整度</span>
+                <span id="completenessScore">95%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="completenessFill" style="width: 95%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>表达准确度</span>
+                <span id="accuracyScore">90%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="accuracyFill" style="width: 90%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>逻辑连贯性</span>
+                <span id="logicScore">92%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="logicFill" style="width: 92%"></div>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">详细分析</h3>
+            <p class="text-gray-600 text-sm" id="analysisIntro">您的背诵内容基本完整，重点内容把握准确。以下是具体分析：</p>
+            <ul class="text-sm text-gray-600 mt-2 space-y-2" id="analysisDetails">
+                <li>✓ 完整复述了马克思主义哲学的基本原理</li>
+                <li>✓ 准确把握了"实践"与"认识"的辩证关系</li>
+                <li>⚠️ "<span class="diff-text">实践是检验真理的唯一标准</span>" 应为 "<span class="highlight">实践是检验真理的根本标准</span>"</li>
+                <li>💡 建议加强对以下概念的理解：
+                    <ul class="ml-4 mt-1 list-disc">
+                        <li>实践与认识的关系</li>
+                        <li>真理的绝对性与相对性</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">记忆曲线分析</h3>
+            <p class="text-gray-600 text-sm">根据您的背诵历史，我们分析了您的记忆曲线：</p>
+            <div class="h-32 bg-white rounded-lg mt-3 p-2 flex items-end justify-between">
+                <div class="h-3/4 w-8 bg-green-100 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">首次</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">85%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-green-200 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">1天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">88%</span>
+                </div>
+                <div class="h-11/12 w-8 bg-green-300 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">3天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">92%</span>
+                </div>
+                <div class="h-full w-8 bg-green-400 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">7天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">95%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-gray-200 rounded-t-md relative border-2 border-dashed border-gray-400">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">14天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">预测</span>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-8 text-center">建议在7天后进行下一次复习，以巩固记忆</p>
+        </div>
+        <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold" onclick="closeResultPanel()">
+            继续背诵
+        </button>
+    </div>
+
+    <!-- 使用说明弹窗 -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-content">
+            <h2 class="text-xl font-bold mb-4">如何使用背诵比对</h2>
+            <div class="tutorial-step">
+                <div class="step-number">1</div>
+                <div>
+                    <h3 class="font-semibold mb-1">输入正确内容</h3>
+                    <p class="text-sm text-gray-600">在上方输入框中输入要背诵的内容，可以直接输入、拍照或从相册选择</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">2</div>
+                <div>
+                    <h3 class="font-semibold mb-1">提交背诵内容</h3>
+                    <p class="text-sm text-gray-600">按住录音按钮开始录制您的背诵内容，松开按钮结束录制</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">3</div>
+                <div>
+                    <h3 class="font-semibold mb-1">查看分析结果</h3>
+                    <p class="text-sm text-gray-600">系统会自动分析您的背诵内容，并给出详细的评分和改进建议</p>
+                </div>
+            </div>
+            <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold mt-4" onclick="closeTutorial()">
+                知道了
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let recordingTimer;
+        let startTime;
+        const recordBtn = document.getElementById('recordBtn');
+        const resultPanel = document.getElementById('resultPanel');
+        const timerDisplay = document.getElementById('recordingTimer');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const correctVersion = document.getElementById('correctVersion');
+        const reciteVersion = document.getElementById('reciteVersion');
+        const exampleSelector = document.getElementById('exampleSelector');
+
+        // 示例内容
+        const exampleContents = {
+            philosophy: {
+                correct: `马克思主义认识论认为：实践是认识的来源。认识的过程是一个实践、认识、再实践、再认识的循环上升过程。实践是检验真理的根本标准。
+
+真理具有客观性，同时具有绝对性和相对性的统一。认识的规律是由感性认识到理性认识，再由理性认识到实践的飞跃。`,
+                recite: `马克思主义认识论认为实践是认识的来源。认识的过程是实践、认识、再实践、再认识的循环上升过程。实践是检验真理的唯一标准。
+
+真理具有客观性，具有绝对性和相对性的统一特征。认识规律是从感性认识到理性认识，再从理性认识到实践的飞跃。`,
+                analysis: {
+                    score: 92,
+                    comment: "非常棒！继续保持",
+                    completeness: 95,
+                    accuracy: 90,
+                    logic: 92,
+                    intro: "您的背诵内容基本完整，重点内容把握准确。以下是具体分析：",
+                    details: [
+                        "✓ 完整复述了马克思主义哲学的基本原理",
+                        "✓ 准确把握了"实践"与"认识"的辩证关系",
+                        "⚠️ \"<span class=\"diff-text\">实践是检验真理的唯一标准</span>\" 应为 \"<span class=\"highlight\">实践是检验真理的根本标准</span>\"",
+                        "💡 建议加强对以下概念的理解：<ul class=\"ml-4 mt-1 list-disc\"><li>实践与认识的关系</li><li>真理的绝对性与相对性</li></ul>"
+                    ]
+                }
+            },
+            politics: {
+                correct: `商品是用来交换的劳动产品。商品具有使用价值和价值两个因素。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性。价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的二因素反映了生产商品的劳动的二重性：具体劳动和抽象劳动。具体劳动创造使用价值，抽象劳动形成价值。`,
+                recite: `商品是用来交换的劳动产品，具有使用价值和价值两个基本属性。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性；价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的两个基本属性反映了生产商品的劳动的二重性：具体劳动创造使用价值，抽象劳动形成价值。`,
+                analysis: {
+                    score: 94,
+                    comment: "出色的表现！",
+                    completeness: 96,
+                    accuracy: 94,
+                    logic: 93,
+                    intro: "您对政治经济学核心概念的理解非常到位，表述清晰准确：",
+                    details: [
+                        "✓ 准确描述了商品的定义和基本属性",
+                        "✓ 正确区分了使用价值和价值的本质区别",
+                        "✓ 清晰阐述了具体劳动和抽象劳动的关系",
+                        "⚠️ \"<span class=\"diff-text\">两个基本属性</span>\" 表述不够准确，应为 \"<span class=\"highlight\">二因素</span>\"",
+                        "💡 建议进一步理解：<ul class=\"ml-4 mt-1 list-disc\"><li>价值形式的发展</li><li>商品拜物教的本质</li></ul>"
+                    ]
+                }
+            },
+            history: {
+                correct: `新民主主义革命是无产阶级领导的，人民大众的，反对帝国主义、封建主义和官僚资本主义的革命。其基本内容是：没收官僚资本，没收地主阶级的土地归农民所有，保护民族工商业。
+
+新民主主义革命的动力是工人阶级、农民阶级、城市小资产阶级和民族资产阶级。其领导力量是工人阶级及其政党——中国共产党。`,
+                recite: `
+```
+</file>
+```
+</file>
+
+<edit_instructions>
+<message_from_colleague>
+调整背诵比对页面的布局，减小两个输入框的高度，并确保开始比对按钮在不滚动的情况下可见
+
+```pages/recite.html
+<code_block_to_apply_changes_from>
+        .input-area {
+            min-height: 140px; /* 减小高度 */
+            max-height: 180px; /* 添加最大高度 */
+            overflow-y: auto; /* 添加滚动条 */
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        // ... existing code ...
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        // ... existing code ...
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto; /* 减小边距 */
+            }
+            
+            .input-area {
+                min-height: 120px; /* 在小屏幕上进一步减小高度 */
+            }
+        }
+</code_block_to_apply_changes_from>
+</edit_instructions>
+
+
+Assistant:<rewritten_file>
+```
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>背诵比对 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .content-box {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin: 16px auto;
+            overflow: hidden;
+            padding: 0;
+            max-width: 92%;
+            width: 100%;
+        }
+
+        .dark-mode .content-box {
+            background: #1c1c1e;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .box-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .input-area {
+            min-height: 140px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            border-top: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+
+        .upload-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #ebebeb;
+        }
+
+        .voice-record-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ff2442;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .voice-record-btn::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #ff2442;
+            opacity: 0.3;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .voice-record-btn.recording::before {
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-record-btn.recording {
+            background: #e61e3c;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .result-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .result-panel.show {
+            transform: translateY(0);
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid #ff2442;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff2442;
+            margin: 0 auto 16px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #ff2442;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .example-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #f5f5f5;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .example-btn:hover, .example-btn:active {
+            background: #ebebeb;
+            transform: scale(1.05);
+        }
+
+        .recording-timer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .recording-timer.show {
+            display: block;
+        }
+
+        .highlight {
+            background: #fff3f5;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+
+        .diff-text {
+            color: #ff2442;
+            text-decoration: line-through;
+        }
+
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tutorial-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .tutorial-content {
+            background: white;
+            width: 90%;
+            max-width: 360px;
+            margin: auto;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .tutorial-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: #ff2442;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto;
+            }
+            
+            .input-area {
+                min-height: 120px;
+            }
+        }
+
+        /* 添加示例选择器样式 */
+        .example-selector {
+            position: absolute;
+            top: 50px;
+            right: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 12px;
+            z-index: 100;
+            width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .example-selector.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .example-item {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .example-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .example-item:hover {
+            background: #f5f5f5;
+        }
+
+        .example-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .example-item-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        @media (min-width: 768px) {
+            .cards-container {
+                padding: 0 24px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200">
+        <div class="flex items-center">
+            <button onclick="history.back()" class="mr-4" title="返回">
+                <i class="fas fa-arrow-left text-xl text-gray-600"></i>
+            </button>
+            <h1 class="text-lg font-semibold">背诵比对</h1>
+            <button class="ml-auto text-sm text-gray-500" onclick="showTutorial()">
+                <i class="fas fa-question-circle mr-1"></i>
+                使用说明
+            </button>
+        </div>
+    </div>
+
+    <!-- 卡片容器 -->
+    <div class="cards-container">
+        <!-- 正确版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">正确版本</span>
+                <span class="text-sm text-gray-500">请输入要背诵的内容</span>
+                <button class="example-btn" onclick="toggleExampleSelector()">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>加载示例</span>
+                </button>
+                <div class="example-selector" id="exampleSelector">
+                    <div class="example-item" onclick="loadExample('philosophy')">
+                        <div class="example-item-title">马克思主义哲学</div>
+                        <div class="example-item-desc">认识论基本原理</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('politics')">
+                        <div class="example-item-title">政治经济学</div>
+                        <div class="example-item-desc">商品的二因素</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('history')">
+                        <div class="example-item-title">中国近代史</div>
+                        <div class="example-item-desc">新民主主义革命</div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area" id="correctVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'correct')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'correct')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 背诵版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">背诵版本</span>
+                <span class="text-sm text-gray-500">请提交您的背诵内容</span>
+            </div>
+            <div class="input-area" id="reciteVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'recite')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'recite')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+                <button class="voice-record-btn" id="recordBtn" title="语音录制">
+                    <i class="fas fa-microphone"></i>
+                    <span class="recording-timer" id="recordingTimer">00:00</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 比对按钮 -->
+        <button class="compare-btn" id="compareBtn" onclick="startCompare()">
+            开始比对
+        </button>
+    </div>
+
+    <!-- 比对结果面板 -->
+    <div class="result-panel" id="resultPanel">
+        <div class="text-center mb-4">
+            <div class="score-circle" id="scoreCircle">92</div>
+            <div class="text-lg font-semibold" id="scoreComment">非常棒！继续保持</div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>内容完整度</span>
+                <span id="completenessScore">95%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="completenessFill" style="width: 95%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>表达准确度</span>
+                <span id="accuracyScore">90%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="accuracyFill" style="width: 90%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>逻辑连贯性</span>
+                <span id="logicScore">92%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="logicFill" style="width: 92%"></div>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">详细分析</h3>
+            <p class="text-gray-600 text-sm" id="analysisIntro">您的背诵内容基本完整，重点内容把握准确。以下是具体分析：</p>
+            <ul class="text-sm text-gray-600 mt-2 space-y-2" id="analysisDetails">
+                <li>✓ 完整复述了马克思主义哲学的基本原理</li>
+                <li>✓ 准确把握了"实践"与"认识"的辩证关系</li>
+                <li>⚠️ "<span class="diff-text">实践是检验真理的唯一标准</span>" 应为 "<span class="highlight">实践是检验真理的根本标准</span>"</li>
+                <li>💡 建议加强对以下概念的理解：
+                    <ul class="ml-4 mt-1 list-disc">
+                        <li>实践与认识的关系</li>
+                        <li>真理的绝对性与相对性</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">记忆曲线分析</h3>
+            <p class="text-gray-600 text-sm">根据您的背诵历史，我们分析了您的记忆曲线：</p>
+            <div class="h-32 bg-white rounded-lg mt-3 p-2 flex items-end justify-between">
+                <div class="h-3/4 w-8 bg-green-100 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">首次</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">85%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-green-200 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">1天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">88%</span>
+                </div>
+                <div class="h-11/12 w-8 bg-green-300 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">3天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">92%</span>
+                </div>
+                <div class="h-full w-8 bg-green-400 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">7天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">95%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-gray-200 rounded-t-md relative border-2 border-dashed border-gray-400">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">14天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">预测</span>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-8 text-center">建议在7天后进行下一次复习，以巩固记忆</p>
+        </div>
+        <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold" onclick="closeResultPanel()">
+            继续背诵
+        </button>
+    </div>
+
+    <!-- 使用说明弹窗 -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-content">
+            <h2 class="text-xl font-bold mb-4">如何使用背诵比对</h2>
+            <div class="tutorial-step">
+                <div class="step-number">1</div>
+                <div>
+                    <h3 class="font-semibold mb-1">输入正确内容</h3>
+                    <p class="text-sm text-gray-600">在上方输入框中输入要背诵的内容，可以直接输入、拍照或从相册选择</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">2</div>
+                <div>
+                    <h3 class="font-semibold mb-1">提交背诵内容</h3>
+                    <p class="text-sm text-gray-600">按住录音按钮开始录制您的背诵内容，松开按钮结束录制</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">3</div>
+                <div>
+                    <h3 class="font-semibold mb-1">查看分析结果</h3>
+                    <p class="text-sm text-gray-600">系统会自动分析您的背诵内容，并给出详细的评分和改进建议</p>
+                </div>
+            </div>
+            <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold mt-4" onclick="closeTutorial()">
+                知道了
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let recordingTimer;
+        let startTime;
+        const recordBtn = document.getElementById('recordBtn');
+        const resultPanel = document.getElementById('resultPanel');
+        const timerDisplay = document.getElementById('recordingTimer');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const correctVersion = document.getElementById('correctVersion');
+        const reciteVersion = document.getElementById('reciteVersion');
+        const exampleSelector = document.getElementById('exampleSelector');
+
+        // 示例内容
+        const exampleContents = {
+            philosophy: {
+                correct: `马克思主义认识论认为：实践是认识的来源。认识的过程是一个实践、认识、再实践、再认识的循环上升过程。实践是检验真理的根本标准。
+
+真理具有客观性，同时具有绝对性和相对性的统一。认识的规律是由感性认识到理性认识，再由理性认识到实践的飞跃。`,
+                recite: `马克思主义认识论认为实践是认识的来源。认识的过程是实践、认识、再实践、再认识的循环上升过程。实践是检验真理的唯一标准。
+
+真理具有客观性，具有绝对性和相对性的统一特征。认识规律是从感性认识到理性认识，再从理性认识到实践的飞跃。`,
+                analysis: {
+                    score: 92,
+                    comment: "非常棒！继续保持",
+                    completeness: 95,
+                    accuracy: 90,
+                    logic: 92,
+                    intro: "您的背诵内容基本完整，重点内容把握准确。以下是具体分析：",
+                    details: [
+                        "✓ 完整复述了马克思主义哲学的基本原理",
+                        "✓ 准确把握了"实践"与"认识"的辩证关系",
+                        "⚠️ \"<span class=\"diff-text\">实践是检验真理的唯一标准</span>\" 应为 \"<span class=\"highlight\">实践是检验真理的根本标准</span>\"",
+                        "💡 建议加强对以下概念的理解：<ul class=\"ml-4 mt-1 list-disc\"><li>实践与认识的关系</li><li>真理的绝对性与相对性</li></ul>"
+                    ]
+                }
+            },
+            politics: {
+                correct: `商品是用来交换的劳动产品。商品具有使用价值和价值两个因素。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性。价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的二因素反映了生产商品的劳动的二重性：具体劳动和抽象劳动。具体劳动创造使用价值，抽象劳动形成价值。`,
+                recite: `商品是用来交换的劳动产品，具有使用价值和价值两个基本属性。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性；价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的两个基本属性反映了生产商品的劳动的二重性：具体劳动创造使用价值，抽象劳动形成价值。`,
+                analysis: {
+                    score: 94,
+                    comment: "出色的表现！",
+                    completeness: 96,
+                    accuracy: 94,
+                    logic: 93,
+                    intro: "您对政治经济学核心概念的理解非常到位，表述清晰准确：",
+                    details: [
+                        "✓ 准确描述了商品的定义和基本属性",
+                        "✓ 正确区分了使用价值和价值的本质区别",
+                        "✓ 清晰阐述了具体劳动和抽象劳动的关系",
+                        "⚠️ \"<span class=\"diff-text\">两个基本属性</span>\" 表述不够准确，应为 \"<span class=\"highlight\">二因素</span>\"",
+                        "💡 建议进一步理解：<ul class=\"ml-4 mt-1 list-disc\"><li>价值形式的发展</li><li>商品拜物教的本质</li></ul>"
+                    ]
+                }
+            },
+            history: {
+                correct: `新民主主义革命是无产阶级领导的，人民大众的，反对帝国主义、封建主义和官僚资本主义的革命。其基本内容是：没收官僚资本，没收地主阶级的土地归农民所有，保护民族工商业。
+
+新民主主义革命的动力是工人阶级、农民阶级、城市小资产阶级和民族资产阶级。其领导力量是工人阶级及其政党——中国共产党。`,
+                recite: `
+```
+</file>
+```
+</file>
+
+<edit_instructions>
+<message_from_colleague>
+调整背诵比对页面的布局，减小两个输入框的高度，并确保开始比对按钮在不滚动的情况下可见
+
+```pages/recite.html
+<code_block_to_apply_changes_from>
+        .input-area {
+            min-height: 140px; /* 减小高度 */
+            max-height: 180px; /* 添加最大高度 */
+            overflow-y: auto; /* 添加滚动条 */
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        // ... existing code ...
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        // ... existing code ...
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto; /* 减小边距 */
+            }
+            
+            .input-area {
+                min-height: 120px; /* 在小屏幕上进一步减小高度 */
+            }
+        }
+</code_block_to_apply_changes_from>
+</edit_instructions>
+
+
+Assistant:<rewritten_file>
+```
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>背诵比对 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .content-box {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin: 16px auto;
+            overflow: hidden;
+            padding: 0;
+            max-width: 92%;
+            width: 100%;
+        }
+
+        .dark-mode .content-box {
+            background: #1c1c1e;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .box-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .input-area {
+            min-height: 140px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            border-top: 1px solid #f0f0f0;
+            justify-content: center;
+        }
+
+        .upload-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #ebebeb;
+        }
+
+        .voice-record-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ff2442;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .voice-record-btn::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #ff2442;
+            opacity: 0.3;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .voice-record-btn.recording::before {
+            animation: pulse 1.5s infinite;
+        }
+
+        .voice-record-btn.recording {
+            background: #e61e3c;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .result-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .result-panel.show {
+            transform: translateY(0);
+        }
+
+        .score-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid #ff2442;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff2442;
+            margin: 0 auto 16px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #ff2442;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .example-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #f5f5f5;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .example-btn:hover, .example-btn:active {
+            background: #ebebeb;
+            transform: scale(1.05);
+        }
+
+        .recording-timer {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .recording-timer.show {
+            display: block;
+        }
+
+        .highlight {
+            background: #fff3f5;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+
+        .diff-text {
+            color: #ff2442;
+            text-decoration: line-through;
+        }
+
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tutorial-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .tutorial-content {
+            background: white;
+            width: 90%;
+            max-width: 360px;
+            margin: auto;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .tutorial-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: #ff2442;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* 修复卡片边距问题 */
+        @media (max-width: 430px) {
+            .content-box {
+                margin: 12px auto;
+            }
+            
+            .input-area {
+                min-height: 120px;
+            }
+        }
+
+        /* 添加示例选择器样式 */
+        .example-selector {
+            position: absolute;
+            top: 50px;
+            right: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 12px;
+            z-index: 100;
+            width: 200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .example-selector.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .example-item {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .example-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .example-item:hover {
+            background: #f5f5f5;
+        }
+
+        .example-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .example-item-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* 比对按钮样式 */
+        .compare-btn {
+            width: 100%;
+            background: #ff2442;
+            color: white;
+            padding: 14px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 16px 0 24px;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.2);
+        }
+
+        .dark-mode .compare-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.2);
+        }
+
+        @media (min-width: 768px) {
+            .cards-container {
+                padding: 0 24px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200">
+        <div class="flex items-center">
+            <button onclick="history.back()" class="mr-4" title="返回">
+                <i class="fas fa-arrow-left text-xl text-gray-600"></i>
+            </button>
+            <h1 class="text-lg font-semibold">背诵比对</h1>
+            <button class="ml-auto text-sm text-gray-500" onclick="showTutorial()">
+                <i class="fas fa-question-circle mr-1"></i>
+                使用说明
+            </button>
+        </div>
+    </div>
+
+    <!-- 卡片容器 -->
+    <div class="cards-container">
+        <!-- 正确版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">正确版本</span>
+                <span class="text-sm text-gray-500">请输入要背诵的内容</span>
+                <button class="example-btn" onclick="toggleExampleSelector()">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>加载示例</span>
+                </button>
+                <div class="example-selector" id="exampleSelector">
+                    <div class="example-item" onclick="loadExample('philosophy')">
+                        <div class="example-item-title">马克思主义哲学</div>
+                        <div class="example-item-desc">认识论基本原理</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('politics')">
+                        <div class="example-item-title">政治经济学</div>
+                        <div class="example-item-desc">商品的二因素</div>
+                    </div>
+                    <div class="example-item" onclick="loadExample('history')">
+                        <div class="example-item-title">中国近代史</div>
+                        <div class="example-item-desc">新民主主义革命</div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area" id="correctVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'correct')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'correct')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 背诵版本框 -->
+        <div class="content-box">
+            <div class="box-header">
+                <span class="font-semibold">背诵版本</span>
+                <span class="text-sm text-gray-500">请提交您的背诵内容</span>
+            </div>
+            <div class="input-area" id="reciteVersion" contenteditable="true" placeholder="在此输入或粘贴文本..."></div>
+            <div class="upload-options">
+                <button class="upload-btn" onclick="uploadPhoto('camera', 'recite')" title="拍照上传">
+                    <i class="fas fa-camera"></i>
+                    <span>拍照上传</span>
+                </button>
+                <button class="upload-btn" onclick="uploadPhoto('gallery', 'recite')" title="从相册选择">
+                    <i class="fas fa-image"></i>
+                    <span>从相册选择</span>
+                </button>
+                <button class="voice-record-btn" id="recordBtn" title="语音录制">
+                    <i class="fas fa-microphone"></i>
+                    <span class="recording-timer" id="recordingTimer">00:00</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 比对按钮 -->
+        <button class="compare-btn" id="compareBtn" onclick="startCompare()">
+            开始比对
+        </button>
+    </div>
+
+    <!-- 比对结果面板 -->
+    <div class="result-panel" id="resultPanel">
+        <div class="text-center mb-4">
+            <div class="score-circle" id="scoreCircle">92</div>
+            <div class="text-lg font-semibold" id="scoreComment">非常棒！继续保持</div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>内容完整度</span>
+                <span id="completenessScore">95%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="completenessFill" style="width: 95%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>表达准确度</span>
+                <span id="accuracyScore">90%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="accuracyFill" style="width: 90%"></div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>逻辑连贯性</span>
+                <span id="logicScore">92%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="logicFill" style="width: 92%"></div>
+            </div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">详细分析</h3>
+            <p class="text-gray-600 text-sm" id="analysisIntro">您的背诵内容基本完整，重点内容把握准确。以下是具体分析：</p>
+            <ul class="text-sm text-gray-600 mt-2 space-y-2" id="analysisDetails">
+                <li>✓ 完整复述了马克思主义哲学的基本原理</li>
+                <li>✓ 准确把握了"实践"与"认识"的辩证关系</li>
+                <li>⚠️ "<span class="diff-text">实践是检验真理的唯一标准</span>" 应为 "<span class="highlight">实践是检验真理的根本标准</span>"</li>
+                <li>💡 建议加强对以下概念的理解：
+                    <ul class="ml-4 mt-1 list-disc">
+                        <li>实践与认识的关系</li>
+                        <li>真理的绝对性与相对性</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-lg mb-4">
+            <h3 class="font-semibold mb-2">记忆曲线分析</h3>
+            <p class="text-gray-600 text-sm">根据您的背诵历史，我们分析了您的记忆曲线：</p>
+            <div class="h-32 bg-white rounded-lg mt-3 p-2 flex items-end justify-between">
+                <div class="h-3/4 w-8 bg-green-100 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">首次</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">85%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-green-200 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">1天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">88%</span>
+                </div>
+                <div class="h-11/12 w-8 bg-green-300 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">3天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">92%</span>
+                </div>
+                <div class="h-full w-8 bg-green-400 rounded-t-md relative">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">7天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">95%</span>
+                </div>
+                <div class="h-5/6 w-8 bg-gray-200 rounded-t-md relative border-2 border-dashed border-gray-400">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">14天后</span>
+                    <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500">预测</span>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-8 text-center">建议在7天后进行下一次复习，以巩固记忆</p>
+        </div>
+        <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold" onclick="closeResultPanel()">
+            继续背诵
+        </button>
+    </div>
+
+    <!-- 使用说明弹窗 -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-content">
+            <h2 class="text-xl font-bold mb-4">如何使用背诵比对</h2>
+            <div class="tutorial-step">
+                <div class="step-number">1</div>
+                <div>
+                    <h3 class="font-semibold mb-1">输入正确内容</h3>
+                    <p class="text-sm text-gray-600">在上方输入框中输入要背诵的内容，可以直接输入、拍照或从相册选择</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">2</div>
+                <div>
+                    <h3 class="font-semibold mb-1">提交背诵内容</h3>
+                    <p class="text-sm text-gray-600">按住录音按钮开始录制您的背诵内容，松开按钮结束录制</p>
+                </div>
+            </div>
+            <div class="tutorial-step">
+                <div class="step-number">3</div>
+                <div>
+                    <h3 class="font-semibold mb-1">查看分析结果</h3>
+                    <p class="text-sm text-gray-600">系统会自动分析您的背诵内容，并给出详细的评分和改进建议</p>
+                </div>
+            </div>
+            <button class="w-full bg-red-500 text-white py-3 rounded-full font-semibold mt-4" onclick="closeTutorial()">
+                知道了
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let recordingTimer;
+        let startTime;
+        const recordBtn = document.getElementById('recordBtn');
+        const resultPanel = document.getElementById('resultPanel');
+        const timerDisplay = document.getElementById('recordingTimer');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const correctVersion = document.getElementById('correctVersion');
+        const reciteVersion = document.getElementById('reciteVersion');
+        const exampleSelector = document.getElementById('exampleSelector');
+
+        // 示例内容
+        const exampleContents = {
+            philosophy: {
+                correct: `马克思主义认识论认为：实践是认识的来源。认识的过程是一个实践、认识、再实践、再认识的循环上升过程。实践是检验真理的根本标准。
+
+真理具有客观性，同时具有绝对性和相对性的统一。认识的规律是由感性认识到理性认识，再由理性认识到实践的飞跃。`,
+                recite: `马克思主义认识论认为实践是认识的来源。认识的过程是实践、认识、再实践、再认识的循环上升过程。实践是检验真理的唯一标准。
+
+真理具有客观性，具有绝对性和相对性的统一特征。认识规律是从感性认识到理性认识，再从理性认识到实践的飞跃。`,
+                analysis: {
+                    score: 92,
+                    comment: "非常棒！继续保持",
+                    completeness: 95,
+                    accuracy: 90,
+                    logic: 92,
+                    intro: "您的背诵内容基本完整，重点内容把握准确。以下是具体分析：",
+                    details: [
+                        "✓ 完整复述了马克思主义哲学的基本原理",
+                        "✓ 准确把握了"实践"与"认识"的辩证关系",
+                        "⚠️ "<span class=\"diff-text\">实践是检验真理的唯一标准</span>\" 应为 \"<span class=\"highlight\">实践是检验真理的根本标准</span>\"",
+                        "💡 建议加强对以下概念的理解：<ul class=\"ml-4 mt-1 list-disc\"><li>实践与认识的关系</li><li>真理的绝对性与相对性</li></ul>"
+                    ]
+                }
+            },
+            politics: {
+                correct: `商品是用来交换的劳动产品。商品具有使用价值和价值两个因素。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性。价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的二因素反映了生产商品的劳动的二重性：具体劳动和抽象劳动。具体劳动创造使用价值，抽象劳动形成价值。`,
+                recite: `商品是用来交换的劳动产品，具有使用价值和价值两个基本属性。使用价值是指商品能够满足人们某种需要的属性，是商品的自然属性；价值是凝结在商品中的无差别的人类劳动，是商品的社会属性。
+
+商品的两个基本属性反映了生产商品的劳动的二重性：具体劳动创造使用价值，抽象劳动形成价值。`,
+                analysis: {
+                    score: 94,
+                    comment: "出色的表现！",
+                    completeness: 96,
+                    accuracy: 94,
+                    logic: 93,
+                    intro: "您对政治经济学核心概念的理解非常到位，表述清晰准确：",
+                    details: [
+                        "✓ 准确描述了商品的定义和基本属性",
+                        "✓ 正确区分了使用价值和价值的本质区别",
+                        "✓ 清晰阐述了具体劳动和抽象劳动的关系",
+                        "⚠️ \"<span class=\"diff-text\">两个基本属性</span>\" 表述不够准确，应为 \"<span class=\"highlight\">二因素</span>\"",
+                        "💡 建议进一步理解：<ul class=\"ml-4 mt-1 list-disc\"><li>价值形式的发展</li><li>商品拜物教的本质</li></ul>"
+                    ]
+                }
+            },
+            history: {
+                correct: `新民主主义革命是无产阶级领导的，人民大众的，反对帝国主义、封建主义和官僚资本主义的革命。其基本内容是：没收官僚资本，没收地主阶级的土地归农民所有，保护民族工商业。
+
+新民主主义革命的动力是工人阶级、农民阶级、城市小资产阶级和民族资产阶级。其领导力量是工人阶级及其政党——中国共产党。`,
+                recite: `
+```
+</file>
+```
+</file>
+
+<edit_instructions>
+<message_from_colleague>
+调整背诵比对页面的布局，减小两个输入框的高度，并确保开始比对按钮在不滚动的情况下可见
+
+```pages/recite.html
+<code_block_to_apply_changes_from>
+        .input-area {
+            min-height: 140px; /* 减小高度 */
+            max-height: 180px; /* 添加最大高度 */
+            overflow-y: auto; /* 添加滚动条 */
+            padding: 16px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        // ... existing code ...
+
+        /* 添加卡片容器样式，使两个卡片居中显示 */
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+           

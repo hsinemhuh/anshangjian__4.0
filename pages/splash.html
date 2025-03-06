@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考研版小红书</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .splash-container {
+            height: 100vh;
+            background: linear-gradient(135deg, #ff2442 0%, #ff4d6d 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 玄学tips样式 */
+        .tips-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 0 20px;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.3s forwards;
+            margin-top: -40px; /* 向上移动一点，为下方元素腾出空间 */
+        }
+
+        .tips-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 24px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .tips-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            transform: scale(0.8);
+            opacity: 0;
+            animation: circleAppear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s forwards;
+        }
+
+        .tips-color {
+            width: 100%;
+            height: 100%;
+            background-color: #FFC857; /* 默认颜色 */
+        }
+
+        .tips-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tips-text {
+            font-size: 18px;
+            text-align: center;
+            max-width: 300px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.95);
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out 1.2s forwards;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 80px; /* 添加下边距，确保不被app logo遮挡 */
+        }
+
+        .loading {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 1.5s forwards;
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: dotPulse 1.4s ease-in-out infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* 底部App Logo */
+        .app-logo {
+            position: absolute;
+            bottom: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 1.8s forwards;
+            transform: scale(0.85);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 6px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo-icon i {
+            font-size: 22px;
+            color: #ff2442;
+        }
+
+        .app-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 倒计时和跳过按钮 */
+        .timer-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out 0.5s forwards;
+            z-index: 10;
+        }
+
+        .timer {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .skip-button {
+            padding: 6px 12px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            font-size: 14px;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .skip-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .skip-button:active {
+            transform: translateY(1px);
+        }
+
+        @keyframes circleAppear {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes dotPulse {
+            0%, 100% {
+                transform: scale(1);
+                background: rgba(255, 255, 255, 0.5);
+            }
+            50% {
+                transform: scale(1.5);
+                background: rgba(255, 255, 255, 1);
+            }
+        }
+
+        .splash-exit {
+            animation: splashExit 0.8s cubic-bezier(0.34, 0.15, 0.64, 1) forwards;
+        }
+
+        @keyframes splashExit {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* 添加背景装饰元素 */
+        .bg-decoration {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+        }
+
+        .bg-circle-1 {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            left: -150px;
+        }
+
+        .bg-circle-2 {
+            width: 200px;
+            height: 200px;
+            bottom: -100px;
+            right: -100px;
+        }
+
+        .bg-circle-3 {
+            width: 100px;
+            height: 100px;
+            top: 20%;
+            right: 10%;
+            opacity: 0.15;
+        }
+    </style>
+</head>
+<body>
+    <div class="splash-container" id="splashScreen">
+        <!-- 背景装饰 -->
+        <div class="bg-decoration bg-circle-1"></div>
+        <div class="bg-decoration bg-circle-2"></div>
+        <div class="bg-decoration bg-circle-3"></div>
+        
+        <!-- 倒计时和跳过按钮 -->
+        <div class="timer-container">
+            <div class="timer" id="timer">5</div>
+            <button class="skip-button" id="skipButton">跳过</button>
+        </div>
+        
+        <!-- 玄学tips内容 -->
+        <div class="tips-container" id="tipsContainer">
+            <div class="tips-title">今日玄学Tips</div>
+            <div class="tips-circle" id="tipsCircle">
+                <!-- 动态内容将在JS中设置 -->
+            </div>
+            <div class="tips-text" id="tipsText">
+                <!-- 动态内容将在JS中设置 -->
+            </div>
+        </div>
+        
+        <!-- 底部App Logo -->
+        <div class="app-logo">
+            <div class="logo-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="app-name">岸上见</div>
+        </div>
+        
+        <div class="loading">
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 玄学tips数据
+        const tipsList = [
+            {
+                type: 'color',
+                content: '#FFC857', // 黄色
+                text: '今日宜穿黄色，有助于提升记忆力和专注度，尤其适合背诵政治理论知识。'
+            },
+            {
+                type: 'color',
+                content: '#4E937A', // 绿色
+                text: '今日宜穿绿色，有助于缓解视觉疲劳，适合长时间阅读英语文献。'
+            },
+            {
+                type: 'color',
+                content: '#B8D8D8', // 淡蓝色
+                text: '今日宜穿淡蓝色，有助于平静心情，适合数学推导和逻辑思考。'
+            },
+            {
+                type: 'image',
+                content: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                text: '今日小动作：换一根笔芯。更换文具会带来新的学习动力，有助于开启高效学习模式。'
+            },
+            {
+                type: 'image',
+                content: 'https://images.unsplash.com/photo-1508341591423-4347099e1f19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                text: '今日小动作：站起来跳两下。每学习45分钟，起身活动一下，能提高学习效率20%。'
+            },
+            {
+                type: 'image',
+                content: 'https://images.unsplash.com/photo-1495954484750-af469f2f9be5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                text: '今日宜喝一杯温水。研究表明，适当补水能提高大脑工作效率，特别是在背诵专业课时。'
+            }
+        ];
+
+        // 随机选择一个tip
+        const randomTip = tipsList[Math.floor(Math.random() * tipsList.length)];
+        const tipsCircle = document.getElementById('tipsCircle');
+        const tipsText = document.getElementById('tipsText');
+        const tipsContainer = document.getElementById('tipsContainer');
+        const timerElement = document.getElementById('timer');
+        const skipButton = document.getElementById('skipButton');
+        const splashScreen = document.getElementById('splashScreen');
+
+        // 显示玄学tip
+        if (randomTip.type === 'color') {
+            const colorDiv = document.createElement('div');
+            colorDiv.className = 'tips-color';
+            colorDiv.style.backgroundColor = randomTip.content;
+            tipsCircle.appendChild(colorDiv);
+        } else if (randomTip.type === 'image') {
+            const imageElement = document.createElement('img');
+            imageElement.className = 'tips-image';
+            imageElement.src = randomTip.content;
+            imageElement.alt = '今日小动作';
+            tipsCircle.appendChild(imageElement);
+        }
+        
+        tipsText.textContent = randomTip.text;
+
+        // 倒计时功能
+        let timeLeft = 5;
+        const countdownInterval = setInterval(() => {
+            timeLeft--;
+            timerElement.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdownInterval);
+                exitSplashScreen();
+            }
+        }, 1000);
+
+        // 跳过按钮点击事件
+        skipButton.addEventListener('click', () => {
+            clearInterval(countdownInterval);
+            exitSplashScreen();
+        });
+
+        // 退出开屏页函数
+        function exitSplashScreen() {
+            splashScreen.classList.add('splash-exit');
+            
+            // 等待退出动画完成后跳转到首页
+            setTimeout(() => {
+                window.location.href = 'home.html';
+            }, 800);
+        }
+    </script>
+</body>
+</html> 

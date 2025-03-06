@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="app-container">
+        <!-- 顶部搜索栏 -->
+        <div class="sticky top-0 bg-white z-10 px-4 py-2">
+            <div class="flex items-center gap-3">
+                <div class="flex-1">
+                    <div class="relative">
+                        <input type="search" placeholder="搜索考研经验、资料、院校..." class="search-input">
+                        <i class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                <button class="w-10 h-10 flex items-center justify-center" title="查看通知">
+                    <i class="fas fa-bell text-gray-600"></i>
+                </button>
+            </div>
+            <!-- 分类标签 -->
+            <div class="flex gap-2 overflow-x-auto py-3 no-scrollbar">
+                <a href="recite.html" class="tag active whitespace-nowrap flex items-center">
+                    <i class="fas fa-book-reader mr-1"></i>
+                    背诵比对
+                </a>
+                <span class="tag whitespace-nowrap">推荐</span>
+                <span class="tag whitespace-nowrap">经验分享</span>
+                <span class="tag whitespace-nowrap">考研资料</span>
+                <span class="tag whitespace-nowrap">院校信息</span>
+                <span class="tag whitespace-nowrap">备考打卡</span>
+                <span class="tag whitespace-nowrap">学习方法</span>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content-area px-4" id="content">
+            <!-- 下拉刷新提示 -->
+            <div class="pull-to-refresh">
+                <div class="loading-spinner"></div>
+                <span class="ml-2">下拉刷新</span>
+            </div>
+
+            <!-- 内容卡片 -->
+            <div class="content-card p-4">
+                <div class="flex items-center mb-3">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" alt="用户头像" class="avatar">
+                    <div class="ml-3">
+                        <div class="font-semibold">考研人加油</div>
+                        <div class="text-xs text-gray-500">2小时前</div>
+                    </div>
+                    <button class="ml-auto" title="更多选项">
+                        <i class="fas fa-ellipsis-h text-gray-400"></i>
+                    </button>
+                </div>
+                <div class="mb-3">
+                    <h3 class="font-bold mb-2">考研英语词汇记忆方法分享</h3>
+                    <p class="text-gray-600 text-sm">分享一下我的考研英语词汇记忆方法，坚持了半年，词汇量提升了3000+，希望对大家有帮助！#考研英语 #词汇学习 #记忆方法</p>
+                </div>
+                <div class="image-grid mb-3">
+                    <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="学习图片">
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="学习图片">
+                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="学习图片">
+                </div>
+                <div class="flex items-center justify-between text-gray-500 text-sm">
+                    <div class="flex items-center gap-4">
+                        <button class="flex items-center gap-1">
+                            <i class="far fa-heart"></i>
+                            <span>1.2k</span>
+                        </button>
+                        <button class="flex items-center gap-1">
+                            <i class="far fa-comment"></i>
+                            <span>88</span>
+                        </button>
+                    </div>
+                    <button class="flex items-center gap-1">
+                        <i class="far fa-bookmark"></i>
+                        <span>收藏</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 第二个内容卡片 -->
+            <div class="content-card p-4">
+                <div class="flex items-center mb-3">
+                    <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" alt="用户头像" class="avatar">
+                    <div class="ml-3">
+                        <div class="font-semibold">考研数学王</div>
+                        <div class="text-xs text-gray-500">4小时前</div>
+                    </div>
+                    <button class="ml-auto" title="更多选项">
+                        <i class="fas fa-ellipsis-h text-gray-400"></i>
+                    </button>
+                </div>
+                <div class="mb-3">
+                    <h3 class="font-bold mb-2">高数重点知识点总结</h3>
+                    <p class="text-gray-600 text-sm">整理了考研数学中最重要的50个知识点，包含详细解析和例题。这些知识点在历年真题中反复出现，建议收藏！#考研数学 #知识点总结</p>
+                </div>
+                <div class="image-grid mb-3">
+                    <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="数学笔记">
+                    <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="公式推导">
+                    <img src="https://images.unsplash.com/photo-1532012197267-da84d127e765?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="例题解析">
+                </div>
+                <div class="flex items-center justify-between text-gray-500 text-sm">
+                    <div class="flex items-center gap-4">
+                        <button class="flex items-center gap-1">
+                            <i class="far fa-heart"></i>
+                            <span>2.5k</span>
+                        </button>
+                        <button class="flex items-center gap-1">
+                            <i class="far fa-comment"></i>
+                            <span>156</span>
+                        </button>
+                    </div>
+                    <button class="flex items-center gap-1">
+                        <i class="far fa-bookmark"></i>
+                        <span>收藏</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 滚动到顶部按钮 -->
+        <button class="scroll-to-top" id="scrollToTop" title="返回顶部">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+
+        <!-- 底部导航栏 -->
+        <nav class="bottom-nav">
+            <div class="nav-items">
+                <a href="home.html" class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    <span>首页</span>
+                </a>
+                <a href="discover.html" class="nav-item">
+                    <i class="fas fa-compass"></i>
+                    <span>发现</span>
+                </a>
+                <a href="recite.html" class="nav-item recite-nav-item">
+                    <div class="recite-icon-wrapper">
+                        <i class="fas fa-book-reader"></i>
+                    </div>
+                    <span>背诵比对</span>
+                </a>
+                <a href="message.html" class="nav-item">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>消息</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>我的</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // 滚动到顶部功能
+        const scrollToTop = document.getElementById('scrollToTop');
+        const content = document.getElementById('content');
+        let lastScrollTop = 0;
+        const bottomNav = document.querySelector('.bottom-nav');
+
+        content.addEventListener('scroll', () => {
+            // 显示/隐藏滚动到顶部按钮
+            if (content.scrollTop > 300) {
+                scrollToTop.classList.add('visible');
+            } else {
+                scrollToTop.classList.remove('visible');
+            }
+
+            // 滚动时隐藏/显示底部导航栏
+            if (content.scrollTop > lastScrollTop && content.scrollTop > 100) {
+                bottomNav.classList.add('hidden');
+            } else {
+                bottomNav.classList.remove('hidden');
+            }
+            lastScrollTop = content.scrollTop;
+        });
+
+        scrollToTop.addEventListener('click', () => {
+            content.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // 点赞动画
+        document.querySelectorAll('.far.fa-heart').forEach(heart => {
+            heart.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.classList.add('like-animation');
+                this.classList.remove('far');
+                this.classList.add('fas');
+                this.style.color = '#ff2442';
+                
+                setTimeout(() => {
+                    this.classList.remove('like-animation');
+                }, 300);
+            });
+        });
+
+        // 下拉刷新功能
+        let touchStart = 0;
+        let pullStarted = false;
+        const pullToRefresh = document.querySelector('.pull-to-refresh');
+
+        content.addEventListener('touchstart', (e) => {
+            if (content.scrollTop <= 0) {
+                touchStart = e.touches[0].clientY;
+                pullStarted = true;
+            }
+        });
+
+        content.addEventListener('touchmove', (e) => {
+            if (!pullStarted) return;
+            
+            const touch = e.touches[0].clientY;
+            const pull = touch - touchStart;
+            
+            if (pull > 0 && pull < 200) {
+                pullToRefresh.style.transform = `translateY(${pull}px)`;
+                e.preventDefault();
+            }
+        });
+
+        content.addEventListener('touchend', () => {
+            if (!pullStarted) return;
+            
+            pullStarted = false;
+            pullToRefresh.style.transform = '';
+            
+            // 模拟刷新
+            if (pullToRefresh.style.transform.includes('translateY(')) {
+                pullToRefresh.classList.add('active');
+                setTimeout(() => {
+                    pullToRefresh.classList.remove('active');
+                    pullToRefresh.style.transform = '';
+                }, 1000);
+            }
+        });
+        
+        // 检查是否启用深色模式
+        document.addEventListener('DOMContentLoaded', () => {
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === 'enabled') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            // 检查字体大小
+            const fontSize = localStorage.getItem('fontSize') || '2';
+            applyFontSize(fontSize);
+        });
+        
+        // 应用字体大小
+        function applyFontSize(size) {
+            const sizeClasses = ['text-xs', 'text-sm', 'text-base', 'text-lg'];
+            document.querySelectorAll('.text-sm, .text-xs, .text-base, .text-lg').forEach(el => {
+                // 移除所有字体大小类
+                sizeClasses.forEach(cls => {
+                    el.classList.remove(cls);
+                });
+                
+                // 根据设置添加对应的字体大小类
+                const currentSize = parseInt(size);
+                if (currentSize === 1) {
+                    el.classList.add('text-xs');
+                } else if (currentSize === 2) {
+                    el.classList.add('text-sm');
+                } else if (currentSize === 3) {
+                    el.classList.add('text-base');
+                } else if (currentSize === 4) {
+                    el.classList.add('text-lg');
+                }
+            });
+        }
+    </script>
+</body>
+</html> 

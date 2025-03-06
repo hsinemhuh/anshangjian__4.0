@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发现 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .publish-btn {
+            position: fixed;
+            right: 20px;
+            bottom: 120px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ff2442;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(255, 36, 66, 0.3);
+            z-index: 100;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+        
+        .publish-btn i {
+            font-size: 28px;
+            margin: 0;
+        }
+        
+        .publish-btn-text {
+            display: none;
+        }
+        
+        .publish-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(255, 36, 66, 0.3);
+        }
+        
+        .dark-mode .publish-btn {
+            background: #ff3b59;
+            box-shadow: 0 4px 12px rgba(255, 59, 89, 0.3);
+        }
+        
+        /* 发布选项弹窗样式 */
+        .publish-options-modal {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .publish-options-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .publish-options-content {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 24px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .dark-mode .publish-options-content {
+            background-color: #1c1c1e;
+            color: white;
+        }
+        
+        .publish-options-modal.show .publish-options-content {
+            transform: translateY(0);
+        }
+        
+        .publish-options-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .publish-options-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .close-btn i {
+            font-size: 20px;
+            color: #333;
+        }
+        
+        .close-btn:active {
+            background-color: #e5e5e5;
+        }
+        
+        .dark-mode .close-btn {
+            background-color: #2c2c2e;
+        }
+        
+        .dark-mode .close-btn i {
+            color: #fff;
+        }
+        
+        .dark-mode .close-btn:active {
+            background-color: #3a3a3c;
+        }
+        
+        .publish-options-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .publish-option-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 15px;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        
+        .publish-option-item:active {
+            background-color: rgba(0, 0, 0, 0.05);
+            transform: translateY(2px);
+        }
+        
+        .publish-option-item:hover {
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .dark-mode .publish-option-item:active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .dark-mode .publish-option-item:hover {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .publish-option-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        }
+        
+        .publish-option-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+        
+        .publish-option-desc {
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .dark-mode .publish-option-desc {
+            color: #aaa;
+        }
+        
+        .cancel-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 16px;
+            background-color: #f5f5f5;
+            color: #333;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 20px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .cancel-btn:active {
+            background-color: #e5e5e5;
+        }
+        
+        .dark-mode .cancel-btn {
+            background-color: #2c2c2e;
+            color: #fff;
+        }
+        
+        .dark-mode .cancel-btn:active {
+            background-color: #3a3a3c;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="app-container">
+        <!-- 顶部搜索栏 -->
+        <div class="sticky top-0 bg-white z-10 px-4 py-2">
+            <div class="relative">
+                <input type="search" placeholder="搜索院校、专业、话题..." class="search-input">
+                <i class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content-area">
+            <!-- 热门话题 -->
+            <section class="px-4 py-3">
+                <h2 class="text-lg font-bold mb-3">热门话题</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="content-card p-3">
+                        <div class="flex items-center">
+                            <i class="fas fa-fire text-red-500 mr-2"></i>
+                            <span class="font-semibold">#考研数学复习技巧</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">23.5k人参与讨论</p>
+                    </div>
+                    <div class="content-card p-3">
+                        <div class="flex items-center">
+                            <i class="fas fa-fire text-red-500 mr-2"></i>
+                            <span class="font-semibold">#考研英语真题解析</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">18.2k人参与讨论</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 院校专业 -->
+            <section class="px-4 py-3">
+                <h2 class="text-lg font-bold mb-3">院校专业</h2>
+                <div class="overflow-x-auto">
+                    <div class="flex gap-3 pb-2">
+                        <div class="content-card p-3 min-w-[200px]">
+                            <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f" alt="北京大学" class="w-full h-24 object-cover rounded-lg mb-2">
+                            <h3 class="font-semibold">北京大学</h3>
+                            <p class="text-sm text-gray-500">计算机科学与技术</p>
+                        </div>
+                        <div class="content-card p-3 min-w-[200px]">
+                            <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f" alt="清华大学" class="w-full h-24 object-cover rounded-lg mb-2">
+                            <h3 class="font-semibold">清华大学</h3>
+                            <p class="text-sm text-gray-500">人工智能</p>
+                        </div>
+                        <div class="content-card p-3 min-w-[200px]">
+                            <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f" alt="复旦大学" class="w-full h-24 object-cover rounded-lg mb-2">
+                            <h3 class="font-semibold">复旦大学</h3>
+                            <p class="text-sm text-gray-500">金融学</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 考研资料 -->
+            <section class="px-4 py-3">
+                <h2 class="text-lg font-bold mb-3">精选资料</h2>
+                <div class="space-y-3">
+                    <div class="content-card p-4">
+                        <div class="flex items-start">
+                            <div class="flex-1">
+                                <h3 class="font-semibold mb-1">2024考研数学高频考点</h3>
+                                <p class="text-sm text-gray-500 mb-2">覆盖高等数学、线性代数、概率论重点章节</p>
+                                <div class="flex items-center text-xs text-gray-400">
+                                    <span>4.9分</span>
+                                    <span class="mx-2">·</span>
+                                    <span>12.5k次下载</span>
+                                </div>
+                            </div>
+                            <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb" alt="资料封面" class="w-20 h-20 object-cover rounded-lg ml-3">
+                        </div>
+                    </div>
+                    <div class="content-card p-4">
+                        <div class="flex items-start">
+                            <div class="flex-1">
+                                <h3 class="font-semibold mb-1">英语写作模板合集</h3>
+                                <p class="text-sm text-gray-500 mb-2">包含小作文、大作文常用句型和模板</p>
+                                <div class="flex items-center text-xs text-gray-400">
+                                    <span>4.8分</span>
+                                    <span class="mx-2">·</span>
+                                    <span>8.3k次下载</span>
+                                </div>
+                            </div>
+                            <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8" alt="资料封面" class="w-20 h-20 object-cover rounded-lg ml-3">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 学习圈子 -->
+            <section class="px-4 py-3">
+                <h2 class="text-lg font-bold mb-3">学习圈子</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="content-card p-3">
+                        <div class="flex items-center mb-2">
+                            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f" alt="圈子封面" class="w-10 h-10 rounded-full">
+                            <div class="ml-2">
+                                <h3 class="font-semibold text-sm">数学党</h3>
+                                <p class="text-xs text-gray-500">2.8k成员</p>
+                            </div>
+                        </div>
+                        <button class="secondary-btn w-full text-sm">加入圈子</button>
+                    </div>
+                    <div class="content-card p-3">
+                        <div class="flex items-center mb-2">
+                            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c" alt="圈子封面" class="w-10 h-10 rounded-full">
+                            <div class="ml-2">
+                                <h3 class="font-semibold text-sm">英语角</h3>
+                                <p class="text-xs text-gray-500">3.2k成员</p>
+                            </div>
+                        </div>
+                        <button class="secondary-btn w-full text-sm">加入圈子</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 发布按钮 -->
+        <div class="publish-btn" id="publishBtn">
+            <i class="fas fa-plus"></i>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <nav class="bottom-nav">
+            <div class="nav-items">
+                <a href="home.html" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>首页</span>
+                </a>
+                <a href="discover.html" class="nav-item active">
+                    <i class="fas fa-compass"></i>
+                    <span>发现</span>
+                </a>
+                <a href="recite.html" class="nav-item recite-nav-item">
+                    <div class="recite-icon-wrapper">
+                        <i class="fas fa-book-reader"></i>
+                    </div>
+                    <span>背诵比对</span>
+                </a>
+                <a href="message.html" class="nav-item">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>消息</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <i class="fas fa-user"></i>
+                    <span>我的</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 发布选项弹窗 -->
+    <div class="publish-options-modal" id="publishOptionsModal">
+        <div class="publish-options-content">
+            <div class="publish-options-header">
+                <h3 class="publish-options-title">选择发布类型</h3>
+                <div class="close-btn" id="closePublishOptions">
+                    <i class="ri-close-line"></i>
+                </div>
+            </div>
+            
+            <div class="publish-options-grid">
+                <div class="publish-option-item" id="publishNote">
+                    <div class="publish-option-icon" style="background-color: rgba(52, 199, 89, 0.1);">
+                        <i class="ri-book-open-line text-2xl" style="color: #34C759;"></i>
+                    </div>
+                    <div class="publish-option-title">发布笔记</div>
+                    <div class="publish-option-desc">分享你的学习心得和笔记</div>
+                </div>
+                
+                <div class="publish-option-item" id="publishQuestion">
+                    <div class="publish-option-icon" style="background-color: rgba(0, 122, 255, 0.1);">
+                        <i class="ri-question-line text-2xl" style="color: #007AFF;"></i>
+                    </div>
+                    <div class="publish-option-title">提出问题</div>
+                    <div class="publish-option-desc">向社区寻求解答</div>
+                </div>
+                
+                <div class="publish-option-item" id="publishMood">
+                    <div class="publish-option-icon" style="background-color: rgba(255, 149, 0, 0.1);">
+                        <i class="ri-heart-line text-2xl" style="color: #FF9500;"></i>
+                    </div>
+                    <div class="publish-option-title">分享心情</div>
+                    <div class="publish-option-desc">记录生活点滴</div>
+                </div>
+            </div>
+            
+            <div class="cancel-btn" id="cancelPublish">取消</div>
+        </div>
+    </div>
+
+    <script>
+        // 发布功能相关
+        document.addEventListener('DOMContentLoaded', function() {
+            const publishBtn = document.getElementById('publishBtn');
+            const publishOptionsModal = document.getElementById('publishOptionsModal');
+            const closePublishOptions = document.getElementById('closePublishOptions');
+            const cancelPublish = document.getElementById('cancelPublish');
+            const publishNote = document.getElementById('publishNote');
+            const publishQuestion = document.getElementById('publishQuestion');
+            const publishMood = document.getElementById('publishMood');
+            
+            // 显示发布选项
+            publishBtn.addEventListener('click', function() {
+                publishOptionsModal.classList.add('show');
+                document.body.style.overflow = 'hidden'; // 防止背景滚动
+            });
+            
+            // 关闭发布选项
+            function closePublishOptionsModal() {
+                publishOptionsModal.classList.remove('show');
+                document.body.style.overflow = ''; // 恢复滚动
+            }
+            
+            closePublishOptions.addEventListener('click', closePublishOptionsModal);
+            cancelPublish.addEventListener('click', closePublishOptionsModal);
+            
+            // 点击背景关闭
+            publishOptionsModal.addEventListener('click', function(e) {
+                if (e.target === publishOptionsModal) {
+                    closePublishOptionsModal();
+                }
+            });
+            
+            // 发布选项点击事件
+            publishNote.addEventListener('click', function() {
+                window.location.href = 'publish-note.html';
+            });
+            
+            publishQuestion.addEventListener('click', function() {
+                window.location.href = 'publish-question.html';
+            });
+            
+            publishMood.addEventListener('click', function() {
+                window.location.href = 'publish-mood.html';
+            });
+        });
+        
+        // 检查是否启用深色模式
+        document.addEventListener('DOMContentLoaded', () => {
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === 'enabled') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            // 检查字体大小
+            const fontSize = localStorage.getItem('fontSize') || '2';
+            applyFontSize(fontSize);
+        });
+        
+        // 应用字体大小
+        function applyFontSize(size) {
+            const sizeClasses = ['text-xs', 'text-sm', 'text-base', 'text-lg'];
+            document.querySelectorAll('.text-sm, .text-xs, .text-base, .text-lg').forEach(el => {
+                // 移除所有字体大小类
+                sizeClasses.forEach(cls => {
+                    el.classList.remove(cls);
+                });
+                
+                // 根据设置添加对应的字体大小类
+                const currentSize = parseInt(size);
+                if (currentSize === 1) {
+                    el.classList.add('text-xs');
+                } else if (currentSize === 2) {
+                    el.classList.add('text-sm');
+                } else if (currentSize === 3) {
+                    el.classList.add('text-base');
+                } else if (currentSize === 4) {
+                    el.classList.add('text-lg');
+                }
+            });
+        }
+    </script>
+</body>
+</html> 

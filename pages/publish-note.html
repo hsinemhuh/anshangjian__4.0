@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布笔记 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+        
+        .content-area {
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 16px;
+            line-height: 1.6;
+            padding: 16px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        .image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .image-preview {
+            position: relative;
+            width: calc(33.333% - 6px);
+            aspect-ratio: 1/1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .add-image {
+            width: calc(33.333% - 6px);
+            aspect-ratio: 1/1;
+            border-radius: 8px;
+            border: 1px dashed var(--bg-tertiary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            background-color: var(--bg-secondary);
+        }
+        
+        .add-image i {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .add-image span {
+            font-size: 12px;
+        }
+        
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 0 16px;
+        }
+        
+        .tag {
+            padding: 6px 12px;
+            border-radius: 16px;
+            background-color: var(--bg-secondary);
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .tag.active {
+            background-color: rgba(255, 36, 66, 0.1);
+            color: #ff2442;
+        }
+        
+        .dark-mode .tag.active {
+            background-color: rgba(255, 59, 89, 0.2);
+            color: #ff3b59;
+        }
+        
+        .bottom-tools {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px 16px;
+            background-color: var(--bg-primary);
+            border-top: 1px solid var(--bg-tertiary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .tool-icons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .tool-icon {
+            font-size: 20px;
+            color: var(--text-tertiary);
+        }
+        
+        .publish-action {
+            padding: 8px 20px;
+            border-radius: 20px;
+            background-color: #ff2442;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .dark-mode .publish-action {
+            background-color: #ff3b59;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <header class="header px-4 py-3 flex items-center">
+            <button onclick="history.back()" class="mr-4" title="返回">
+                <i class="fas fa-arrow-left text-lg"></i>
+            </button>
+            <h1 class="text-lg font-bold flex-1 text-center">发布笔记</h1>
+            <button class="publish-action" id="publishButton">发布</button>
+        </header>
+        
+        <!-- 主要内容区 -->
+        <div class="main-content pb-20">
+            <textarea class="content-area w-full" placeholder="分享你的学习心得和笔记..."></textarea>
+            
+            <div class="px-4">
+                <div class="image-preview-container">
+                    <div class="image-preview">
+                        <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="预览图">
+                        <div class="remove-image">
+                            <i class="fas fa-times"></i>
+                        </div>
+                    </div>
+                    <div class="image-preview">
+                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="预览图">
+                        <div class="remove-image">
+                            <i class="fas fa-times"></i>
+                        </div>
+                    </div>
+                    <div class="add-image" id="addImageBtn">
+                        <i class="fas fa-camera"></i>
+                        <span>添加图片</span>
+                    </div>
+                </div>
+                
+                <div class="tag-container">
+                    <div class="tag active">数学</div>
+                    <div class="tag">英语</div>
+                    <div class="tag">政治</div>
+                    <div class="tag">专业课</div>
+                    <div class="tag">复习计划</div>
+                    <div class="tag">学习方法</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部工具栏 -->
+        <div class="bottom-tools">
+            <div class="tool-icons">
+                <div class="tool-icon">
+                    <i class="fas fa-at"></i>
+                </div>
+                <div class="tool-icon">
+                    <i class="fas fa-hashtag"></i>
+                </div>
+                <div class="tool-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="tool-icon">
+                    <i class="fas fa-smile"></i>
+                </div>
+            </div>
+            <div class="text-sm text-gray-500">公开</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tags = document.querySelectorAll('.tag');
+            const addImageBtn = document.getElementById('addImageBtn');
+            const publishButton = document.getElementById('publishButton');
+            
+            // 标签点击事件
+            tags.forEach(tag => {
+                tag.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                });
+            });
+            
+            // 添加图片按钮点击事件
+            addImageBtn.addEventListener('click', function() {
+                // 这里应该调用系统相册或相机
+                alert('打开相册/相机功能');
+            });
+            
+            // 发布按钮点击事件
+            publishButton.addEventListener('click', function() {
+                alert('笔记发布成功！');
+                window.location.href = 'discover.html';
+            });
+            
+            // 移除图片按钮点击事件
+            const removeButtons = document.querySelectorAll('.remove-image');
+            removeButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const preview = this.parentElement;
+                    preview.remove();
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

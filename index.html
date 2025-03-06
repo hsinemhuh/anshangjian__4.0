@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>「岸上见」App原型设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <style>
+        :root {
+            /* Apple UI颜色系统 */
+            --sf-blue: #007AFF;
+            --sf-blue-dark: #0A84FF;
+            --sf-green: #34C759;
+            --sf-green-dark: #30D158;
+            --sf-indigo: #5856D6;
+            --sf-indigo-dark: #5E5CE6;
+            --sf-orange: #FF9500;
+            --sf-orange-dark: #FF9F0A;
+            --sf-pink: #FF2D55;
+            --sf-pink-dark: #FF375F;
+            --sf-purple: #AF52DE;
+            --sf-purple-dark: #BF5AF2;
+            --sf-red: #FF3B30;
+            --sf-red-dark: #FF453A;
+            --sf-teal: #5AC8FA;
+            --sf-teal-dark: #64D2FF;
+            --sf-yellow: #FFCC00;
+            --sf-yellow-dark: #FFD60A;
+            
+            /* 基础颜色 */
+            --primary-color: var(--sf-pink);
+            --primary-hover: var(--sf-pink-dark);
+            --success-color: var(--sf-green);
+            --success-hover: var(--sf-green-dark);
+            
+            /* 背景和文本颜色 */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #F2F2F7;
+            --bg-tertiary: #E5E5EA;
+            --text-primary: #000000;
+            --text-secondary: #3A3A3C;
+            --text-tertiary: #8E8E93;
+            
+            /* 动画时间 */
+            --animation-fast: 0.15s;
+            --animation-medium: 0.25s;
+            --animation-slow: 0.35s;
+            
+            /* 字体 */
+            --font-sf: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, sans-serif;
+        }
+        
+        /* 深色模式颜色 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #1C1C1E;
+                --bg-secondary: #2C2C2E;
+                --bg-tertiary: #3A3A3C;
+                --text-primary: #FFFFFF;
+                --text-secondary: #EBEBF5;
+                --text-tertiary: #8E8E93;
+            }
+        }
+        
+        body {
+            font-family: var(--font-sf);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color var(--animation-medium) ease, 
+                        color var(--animation-medium) ease;
+        }
+        
+        body.dark-mode {
+            background-color: #000000;
+            color: #FFFFFF;
+        }
+        
+        header {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: background-color var(--animation-medium) ease;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            z-index: 100;
+            margin-bottom: 2rem; /* 增加底部间距，避免遮挡内容 */
+        }
+        
+        body.dark-mode header {
+            background-color: rgba(30, 30, 30, 0.9);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #000000; /* 确保标题颜色始终为黑色，提高可读性 */
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5); /* 添加文字阴影增强可读性 */
+        }
+        
+        body.dark-mode h1 {
+            color: #FFFFFF; /* 深色模式下标题为白色 */
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        /* 副标题样式 */
+        header p {
+            color: #666666;
+            font-weight: 500;
+        }
+        
+        body.dark-mode header p {
+            color: #BBBBBB;
+        }
+        
+        .frame-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.9); /* 添加背景色提高可读性 */
+            padding: 0.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        body.dark-mode .frame-title {
+            background-color: rgba(30, 30, 30, 0.9);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .frame-title i {
+            transition: transform var(--animation-medium) ease;
+        }
+        
+        .frame-title:hover i {
+            transform: scale(1.2);
+        }
+        
+        .frame-title .page-title {
+            color: #000000; /* 确保页面标题文字颜色为黑色 */
+            font-weight: 600;
+        }
+        
+        body.dark-mode .frame-title .page-title {
+            color: #FFFFFF; /* 深色模式下页面标题为白色 */
+        }
+        
+        .phone-frame {
+            width: 380px; /* 减小宽度 */
+            height: 824px; /* 减小高度，保持比例 */
+            border-radius: 55px;
+            padding: 0;
+            background: #000;
+            box-shadow: 0 25px 70px -12px rgba(0, 0, 0, 0.25), 
+                        0 0 20px rgba(0, 0, 0, 0.1), 
+                        0 0 0 1px rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+            transition: transform var(--animation-medium) cubic-bezier(0.34, 1.56, 0.64, 1),
+                        box-shadow var(--animation-medium) ease;
+            margin: 0 auto;
+            transform-origin: top center;
+        }
+        
+        .phone-frame:hover {
+            transform: scale(1.02) translateY(-8px);
+            box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.3),
+                        0 0 30px rgba(0, 0, 0, 0.15),
+                        0 0 0 1px rgba(255, 255, 255, 0.07);
+        }
+        
+        .status-bar {
+            height: 65px; /* Dynamic Island + Status Bar for iPhone 16 Pro Max */
+            background: #000;
+            position: relative;
+            z-index: 50;
+        }
+        
+        .dynamic-island {
+            width: 140px;
+            height: 40px;
+            background: #000;
+            border-radius: 24px;
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+        }
+        
+        .dynamic-island:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: rgba(60, 60, 60, 0.8);
+            border-radius: 50%;
+            box-shadow: -24px 0 0 rgba(60, 60, 60, 0.5),
+                         24px 0 0 rgba(60, 60, 60, 0.5);
+        }
+
+        .home-indicator {
+            width: 140px;
+            height: 5px;
+            background: #000;
+            border-radius: 100px;
+            position: absolute;
+            bottom: 9px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+        }
+        
+        .screen {
+            height: calc(100% - 65px);
+            background: white;
+            position: relative;
+            overflow: hidden;
+            transition: background var(--animation-medium) ease;
+        }
+        
+        body.dark-mode .screen {
+            background: #000000;
+        }
+
+        /* 添加机身边框效果 */
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 15px solid #000;
+            border-radius: 55px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* 添加电源键 */
+        .power-button {
+            position: absolute;
+            right: -2px;
+            top: 200px;
+            width: 3px;
+            height: 110px;
+            background: #1a1a1a;
+            border-radius: 2px;
+            z-index: 70;
+        }
+
+        /* 添加音量按钮 */
+        .volume-buttons {
+            position: absolute;
+            left: -2px;
+            top: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+            z-index: 70;
+        }
+
+        .volume-button {
+            width: 3px;
+            height: 65px;
+            background: #1a1a1a;
+            border-radius: 2px;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .prototype-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        .device-badge {
+            position: absolute;
+            top: -20px;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .control-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--animation-medium) cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(255, 45, 85, 0.3);
+        }
+
+        .control-button:hover {
+            background: var(--primary-hover);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 45, 85, 0.4);
+        }
+
+        .control-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(255, 45, 85, 0.3);
+        }
+
+        .control-button i {
+            font-size: 16px;
+        }
+
+        .playing {
+            background: var(--success-color);
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+        }
+
+        .playing:hover {
+            background: var(--success-hover);
+            box-shadow: 0 6px 16px rgba(52, 199, 89, 0.4);
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(242, 242, 247, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 
+                        0 0 0 1px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            transition: all var(--animation-medium) cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            color: var(--text-secondary);
+        }
+        
+        .dark-mode .theme-toggle {
+            background: rgba(44, 44, 46, 0.8);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3),
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            color: var(--primary-color);
+        }
+        
+        .theme-toggle:active {
+            transform: scale(0.95);
+        }
+        
+        .theme-toggle i {
+            font-size: 22px;
+        }
+        
+        .page-nav {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 90;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 0.5rem;
+            border-radius: 50px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+                        0 0 0 1px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .dark-mode .page-nav {
+            background: rgba(44, 44, 46, 0.8);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3),
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+        
+        .page-nav-item {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all var(--animation-medium) ease;
+            position: relative;
+        }
+        
+        .dark-mode .page-nav-item {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .page-nav-item:hover {
+            background: rgba(0, 0, 0, 0.4);
+            transform: scale(1.2);
+        }
+        
+        .dark-mode .page-nav-item:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+        
+        .page-nav-item.active {
+            background: var(--primary-color);
+            transform: scale(1.3);
+            box-shadow: 0 0 10px rgba(255, 45, 85, 0.5);
+        }
+        
+        .dark-mode .page-nav-item.active {
+            background: var(--primary-color);
+            box-shadow: 0 0 10px rgba(255, 45, 85, 0.7);
+        }
+        
+        .page-nav-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: all var(--animation-medium) ease;
+            white-space: nowrap;
+        }
+        
+        .page-nav-item:hover::after {
+            opacity: 1;
+            right: 25px;
+        }
+        
+        .page-title {
+            position: relative;
+            transition: all var(--animation-medium) ease;
+        }
+        
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-color);
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform var(--animation-medium) cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            border-radius: 1px;
+        }
+        
+        .frame-title:hover .page-title::after {
+            transform: scaleX(1);
+        }
+        
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .dark-mode ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .dark-mode ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark-mode ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* 加载动画 */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+        }
+        
+        .loading-pulse {
+            display: inline-block;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        /* 反馈提示 */
+        .tooltip {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
+        
+        .tooltip.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        /* 版本标识样式 */
+        .version-badge {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            z-index: 90;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .version-badge::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--sf-green);
+            border-radius: 50%;
+        }
+        
+        .dark-mode .version-badge {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .prototype-container {
+                grid-template-columns: 1fr;
+                padding-top: 4rem; /* 增加顶部内边距，避免被header遮挡 */
+            }
+            
+            .page-nav {
+                display: none;
+            }
+            
+            .phone-frame {
+                width: 430px; /* 保持iPhone 16 Pro Max原始宽度 */
+                height: 932px; /* 保持iPhone 16 Pro Max原始高度 */
+                border-radius: 55px;
+                margin: 0 auto;
+                transform: scale(0.85); /* 适当缩小以适应屏幕 */
+                transform-origin: top center;
+            }
+            
+            .phone-frame::before {
+                border-width: 15px;
+                border-radius: 55px;
+            }
+            
+            .dynamic-island {
+                width: 140px;
+                height: 40px;
+            }
+            
+            header {
+                position: sticky;
+                top: 0;
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+            }
+        }
+        
+        /* 更小屏幕的响应式优化 */
+        @media (max-width: 480px) {
+            .phone-frame {
+                width: 430px; /* 保持iPhone 16 Pro Max原始宽度 */
+                height: 932px; /* 保持iPhone 16 Pro Max原始高度 */
+                transform: scale(0.7); /* 更小屏幕下进一步缩小 */
+                margin-left: -15%; /* 负边距补偿缩放导致的居中问题 */
+                margin-right: -15%;
+            }
+            
+            .layout-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-bottom: 1.5rem;
+            }
+            
+            .prototype-container {
+                padding-top: 3rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.75rem; /* 减小标题字体大小 */
+            }
+            
+            .prototype-item {
+                overflow: hidden; /* 防止负边距导致的水平滚动 */
+            }
+        }
+        
+        /* 超小屏幕的响应式优化 */
+        @media (max-width: 380px) {
+            .phone-frame {
+                transform: scale(0.65); /* 超小屏幕下更进一步缩小 */
+                margin-left: -20%; /* 更大的负边距补偿 */
+                margin-right: -20%;
+            }
+        }
+        
+        body.dark-mode .device-badge {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* App介绍卡片样式 */
+        .app-intro-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+            transition: all var(--animation-medium) ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body.dark-mode .app-intro-card {
+            background: #1C1C1E;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .app-intro-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .app-intro-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--sf-pink) 0%, var(--sf-purple) 100%);
+        }
+        
+        .app-intro-card h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--sf-pink) 0%, var(--sf-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+        
+        .app-intro-card p {
+            font-size: 1.1rem;
+            color: #333333; /* 添加明确的文字颜色 */
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        
+        body.dark-mode .app-intro-card p {
+            color: #f5f5f7; /* 深色模式下的文字颜色 */
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .feature-item {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all var(--animation-medium) ease;
+            border: 1px solid var(--bg-tertiary);
+        }
+        
+        body.dark-mode .feature-item {
+            border-color: var(--bg-tertiary);
+        }
+        
+        .feature-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        body.dark-mode .feature-item:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            background: var(--bg-primary);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .feature-item:nth-child(1) .feature-icon {
+            color: var(--sf-pink);
+        }
+        
+        .feature-item:nth-child(2) .feature-icon {
+            color: var(--sf-blue);
+        }
+        
+        .feature-item:nth-child(3) .feature-icon {
+            color: var(--sf-green);
+        }
+        
+        .feature-item:nth-child(4) .feature-icon {
+            color: var(--sf-purple);
+        }
+        
+        .feature-item h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-item p {
+            font-size: 0.95rem;
+            color: var(--text-tertiary);
+            line-height: 1.5;
+        }
+        
+        /* 内容间距调整 */
+        .content-wrapper {
+            padding-top: 200px; /* 为固定标题留出更多空间 */
+        }
+        
+        /* 固定标题卡片样式 */
+        .header-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 1000;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        body.dark-mode .header-fixed {
+            background-color: rgba(30, 30, 30, 0.95);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-fixed.hidden {
+            opacity: 0;
+            transform: translateY(-100%);
+            pointer-events: none;
+        }
+        
+        /* 背诵比对展示卡片样式 */
+        .recite-demo-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+            transition: all var(--animation-medium) ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body.dark-mode .recite-demo-card {
+            background: #1C1C1E;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .recite-demo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--sf-green) 0%, var(--sf-teal) 100%);
+        }
+        
+        .recite-demo-card h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--sf-green) 0%, var(--sf-teal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+        
+        .recite-demo-card > p {
+            font-size: 1.1rem;
+            color: #333333;
+            font-weight: 500;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            max-width: 90%;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+        
+        body.dark-mode .recite-demo-card > p {
+            color: #f5f5f7;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+        }
+        
+        .recite-section {
+            margin-bottom: 3rem;
+            border-radius: 16px;
+            background-color: var(--bg-secondary);
+            padding: 1.5rem;
+            transition: all var(--animation-medium) ease;
+        }
+        
+        .recite-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+        
+        body.dark-mode .recite-section:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+        
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--sf-green);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-header h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .section-content {
+            padding: 0 1rem;
+        }
+        
+        .section-content > p {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* 技术特点样式 */
+        .tech-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .tech-feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            transition: all var(--animation-medium) ease;
+        }
+        
+        .tech-feature:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        body.dark-mode .tech-feature:hover {
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .tech-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            background: rgba(52, 199, 89, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: var(--sf-green);
+        }
+        
+        .tech-text h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .tech-text p {
+            font-size: 0.95rem;
+            color: var(--text-tertiary);
+            line-height: 1.5;
+        }
+        
+        /* 使用流程样式 */
+        .process-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .process-step {
+            display: flex;
+            gap: 1.5rem;
+            position: relative;
+        }
+        
+        .process-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 50px;
+            left: 25px;
+            width: 2px;
+            height: calc(100% + 2rem);
+            background: rgba(52, 199, 89, 0.2);
+            z-index: 1;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--sf-green);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            z-index: 2;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-content h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .step-content p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        
+        .step-image {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        
+        .step-image img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            transition: transform var(--animation-medium) ease;
+        }
+        
+        .step-image:hover img {
+            transform: scale(1.03);
+        }
+        
+        /* 用户案例样式 */
+        .testimonials {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 2rem;
+        }
+        
+        .testimonial {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all var(--animation-medium) ease;
+        }
+        
+        .testimonial:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+        
+        body.dark-mode .testimonial:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .testimonial-content {
+            padding: 1.5rem;
+            position: relative;
+        }
+        
+        .quote-icon {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            font-size: 1.5rem;
+            color: rgba(52, 199, 89, 0.2);
+        }
+        
+        .testimonial-content p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin: 0 0 1rem 2rem;
+        }
+        
+        .testimonial-image {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        
+        .testimonial-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--animation-medium) ease;
+        }
+        
+        .testimonial:hover .testimonial-image img {
+            transform: scale(1.05);
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: rgba(52, 199, 89, 0.05);
+            border-top: 1px solid rgba(52, 199, 89, 0.1);
+        }
+        
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .author-info h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+        
+        .author-info p {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+        }
+        
+        /* 体验效果样式 */
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--bg-primary);
+            border-radius: 16px;
+            min-width: 180px;
+            transition: all var(--animation-medium) ease;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+        
+        body.dark-mode .stat-item:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--sf-green) 0%, var(--sf-teal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .cta-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--sf-green);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all var(--animation-medium) cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 6px 16px rgba(52, 199, 89, 0.3);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(52, 199, 89, 0.4);
+        }
+        
+        .cta-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .tech-features {
+                grid-template-columns: 1fr;
+            }
+            
+            .testimonials {
+                grid-template-columns: 1fr;
+            }
+            
+            .process-step {
+                flex-direction: column;
+            }
+            
+            .process-step:not(:last-child)::after {
+                left: 25px;
+                top: 50px;
+                height: 50px;
+            }
+            
+            .step-content {
+                padding-left: 0;
+            }
+            
+            .recite-demo-card > p {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .stats-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .stat-item {
+                width: 100%;
+            }
+        }
+
+        /* 苹果风格的可视化元素 */
+        .step-visual {
+            width: 100%;
+            max-width: 300px;
+            height: 180px;
+            margin: 1.5rem auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .apple-style-icon {
+            width: 180px;
+            height: 180px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.1) 0%, rgba(90, 200, 250, 0.1) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        body.dark-mode .apple-style-icon {
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.15) 0%, rgba(90, 200, 250, 0.15) 100%);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .apple-style-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .apple-style-icon > i {
+            font-size: 3rem;
+            color: var(--sf-green);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .apple-style-icon:hover > i {
+            transform: scale(1.1);
+        }
+
+        .icon-animation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        /* 第一步动画 - 相机到文件 */
+        .icon-animation i {
+            font-size: 1.2rem;
+            color: var(--sf-green);
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .apple-style-icon:hover .icon-animation i {
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        .apple-style-icon:hover .icon-animation i:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .apple-style-icon:hover .icon-animation i:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        /* 第二步动画 - 声波效果 */
+        .sound-wave {
+            width: 3px;
+            height: 15px;
+            background-color: var(--sf-green);
+            border-radius: 3px;
+            margin: 0 2px;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .apple-style-icon:hover .sound-wave {
+            animation: soundWave 0.8s infinite alternate;
+        }
+
+        .apple-style-icon:hover .sound-wave:nth-child(2) {
+            animation-delay: 0.2s;
+            height: 25px;
+        }
+
+        .apple-style-icon:hover .sound-wave:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes soundWave {
+            0% {
+                height: 5px;
+            }
+            100% {
+                height: 30px;
+            }
+        }
+
+        /* 第三步动画 - 结果条形图 */
+        .result-bar {
+            width: 8px;
+            height: 20px;
+            background-color: var(--sf-green);
+            border-radius: 4px;
+            margin: 0 4px;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .apple-style-icon:hover .result-bar {
+            animation: growBar 1.2s infinite alternate;
+        }
+
+        .apple-style-icon:hover .result-bar:nth-child(2) {
+            animation-delay: 0.4s;
+            height: 30px;
+        }
+
+        .apple-style-icon:hover .result-bar:nth-child(3) {
+            animation-delay: 0.8s;
+        }
+
+        @keyframes growBar {
+            0% {
+                height: 10px;
+                opacity: 0.5;
+            }
+            100% {
+                height: 40px;
+                opacity: 0.9;
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        /* 用户案例可视化样式 */
+        .case-visual {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            height: 120px;
+            padding: 0 1rem;
+        }
+
+        .subject-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .subject-icon.politics {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+        }
+
+        .subject-icon.english {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .subject-icon i {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .accuracy-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: white;
+            color: #333;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .comparison-visual {
+            flex: 1;
+            margin-left: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .text-line {
+            height: 12px;
+            background: rgba(52, 199, 89, 0.2);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .text-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 70%;
+            background: rgba(52, 199, 89, 0.5);
+            border-radius: 6px;
+        }
+
+        .text-line.wrong::before {
+            background: rgba(255, 59, 48, 0.5);
+            width: 40%;
+        }
+
+        .text-line.missing::before {
+            background: rgba(255, 149, 0, 0.5);
+            width: 60%;
+        }
+
+        .testimonial:hover .subject-icon {
+            transform: scale(1.1);
+        }
+
+        .testimonial:hover .text-line::before {
+            animation: progressBar 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes progressBar {
+            0% {
+                width: 30%;
+            }
+            100% {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- 固定标题卡片 -->
+    <header class="header-fixed" id="headerFixed">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">「岸上见」App原型设计</h1>
+                    <p class="text-lg text-gray-700 dark:text-gray-300">面向考研学生的社交分享平台</p>
+                    <div class="mt-3 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                        <p class="text-gray-800 dark:text-gray-200 text-sm leading-relaxed">
+                            「岸上见」是一款专为考研学生打造的社交分享平台，旨在帮助考生分享经验、交流资源、记录备考过程，让考研之路不再孤单。
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center mt-4 md:mt-0">
+                    <div class="mr-4 flex items-center">
+                        <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                        <span class="text-sm font-medium">v1.2.9</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-sm font-medium mr-2">布局:</span>
+                        <button id="gridViewBtn" class="p-2 rounded-l-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" title="网格视图">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button id="listViewBtn" class="p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" title="列表视图">
+                            <i class="fas fa-list"></i>
+                        </button>
+                        <button id="singleViewBtn" class="p-2 rounded-r-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" title="单屏视图">
+                            <i class="fas fa-mobile-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="content-wrapper">
+        <div class="theme-toggle" id="themeToggle" title="切换深色/浅色模式">
+            <i class="fas fa-moon"></i>
+        </div>
+        
+        <div class="page-nav" id="pageNav">
+            <div class="page-nav-item active" data-index="0" data-tooltip="首页" title="首页"></div>
+            <div class="page-nav-item" data-index="1" data-tooltip="发现" title="发现"></div>
+            <div class="page-nav-item" data-index="2" data-tooltip="背诵比对" title="背诵比对"></div>
+            <div class="page-nav-item" data-index="3" data-tooltip="消息" title="消息"></div>
+            <div class="page-nav-item" data-index="4" data-tooltip="我的" title="我的"></div>
+        </div>
+        
+        <div class="prototype-container" id="prototypeContainer">
+            <!-- 首页 -->
+            <div class="prototype-item" id="home">
+                <div class="frame-title">
+                    <i class="fas fa-home text-red-500"></i>
+                    <span class="page-title">首页</span>
+                    <button class="ml-3 px-2 py-1 bg-pink-500 hover:bg-pink-600 text-white text-xs rounded-full transition-all flex items-center" id="loopControl" title="播放开屏页">
+                        <i class="fas fa-play mr-1 text-xs"></i>
+                        <span>播放开屏页</span>
+                    </button>
+                </div>
+                <div class="device-badge">iPhone 16 Pro Max</div>
+                <div class="phone-frame relative">
+                    <div class="power-button"></div>
+                    <div class="volume-buttons">
+                        <div class="volume-button"></div>
+                        <div class="volume-button"></div>
+                    </div>
+                    <div class="status-bar">
+                        <div class="dynamic-island"></div>
+                    </div>
+                    <div class="screen">
+                        <iframe src="pages/splash.html" id="splashFrame"></iframe>
+                    </div>
+                    <div class="home-indicator"></div>
+                </div>
+            </div>
+            
+            <!-- 发现页 -->
+            <div class="prototype-item" id="discover">
+                <div class="frame-title">
+                    <i class="fas fa-compass text-blue-500"></i>
+                    <span class="page-title">发现</span>
+                </div>
+                <div class="device-badge">iPhone 16 Pro Max</div>
+                <div class="phone-frame">
+                    <div class="power-button"></div>
+                    <div class="volume-buttons">
+                        <div class="volume-button"></div>
+                        <div class="volume-button"></div>
+                    </div>
+                    <div class="status-bar">
+                        <div class="dynamic-island"></div>
+                    </div>
+                    <div class="screen">
+                        <iframe src="pages/discover.html"></iframe>
+                    </div>
+                    <div class="home-indicator"></div>
+                </div>
+            </div>
+            
+            <!-- 背诵比对页 -->
+            <div class="prototype-item" id="recite">
+                <div class="frame-title">
+                    <i class="fas fa-book-reader text-green-500"></i>
+                    <span class="page-title">背诵比对</span>
+                </div>
+                <div class="device-badge">iPhone 16 Pro Max</div>
+                <div class="phone-frame">
+                    <div class="power-button"></div>
+                    <div class="volume-buttons">
+                        <div class="volume-button"></div>
+                        <div class="volume-button"></div>
+                    </div>
+                    <div class="status-bar">
+                        <div class="dynamic-island"></div>
+                    </div>
+                    <div class="screen">
+                        <iframe src="pages/recite.html" style="width: 100%; height: 100%; border: none; overflow: visible;"></iframe>
+                    </div>
+                    <div class="home-indicator"></div>
+                </div>
+            </div>
+            
+            <!-- 消息中心 -->
+            <div class="prototype-item" id="message">
+                <div class="frame-title">
+                    <i class="fas fa-comment-dots text-purple-500"></i>
+                    <span class="page-title">消息</span>
+                </div>
+                <div class="device-badge">iPhone 16 Pro Max</div>
+                <div class="phone-frame">
+                    <div class="power-button"></div>
+                    <div class="volume-buttons">
+                        <div class="volume-button"></div>
+                        <div class="volume-button"></div>
+                    </div>
+                    <div class="status-bar">
+                        <div class="dynamic-island"></div>
+                    </div>
+                    <div class="screen">
+                        <iframe src="pages/message.html"></iframe>
+                    </div>
+                    <div class="home-indicator"></div>
+                </div>
+            </div>
+            
+            <!-- 个人中心 -->
+            <div class="prototype-item" id="profile">
+                <div class="frame-title">
+                    <i class="fas fa-user text-orange-500"></i>
+                    <span class="page-title">我的</span>
+                </div>
+                <div class="device-badge">iPhone 16 Pro Max</div>
+                <div class="phone-frame">
+                    <div class="power-button"></div>
+                    <div class="volume-buttons">
+                        <div class="volume-button"></div>
+                        <div class="volume-button"></div>
+                    </div>
+                    <div class="status-bar">
+                        <div class="dynamic-island"></div>
+                    </div>
+                    <div class="screen">
+                        <iframe src="pages/profile.html"></iframe>
+                    </div>
+                    <div class="home-indicator"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- App介绍卡片 -->
+        <div class="app-intro-card">
+            <h2>「岸上见」App - 考研路上的伙伴</h2>
+            <p>「岸上见」是一款专为考研学生打造的社交分享平台，旨在帮助考生分享经验、交流资源、记录备考过程，让考研之路不再孤单。</p>
+            
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h3>经验分享</h3>
+                    <p>汇集各高校考研成功学长学姐的经验分享，提供备考策略和复习方法</p>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h3>院校资讯</h3>
+                    <p>提供全面的院校专业信息，包括招生政策、历年分数线和导师信息</p>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-book-reader"></i>
+                    </div>
+                    <h3>背诵比对</h3>
+                    <p>创新的背诵内容比对功能，帮助考生高效记忆和检验背诵效果</p>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>社区互动</h3>
+                    <p>打造考研学习圈子，结交志同道合的伙伴，互相鼓励和监督</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 背诵比对展示卡片 -->
+        <div class="recite-demo-card">
+            <h2>背诵比对 - 高效记忆的智能助手</h2>
+            <p>「岸上见」App独创的背诵比对功能，利用先进的NLP技术，帮助考研学子高效记忆、精准评估背诵质量，让备考更加高效</p>
+            
+            <!-- 技术原理部分 -->
+            <div class="recite-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-microchip"></i>
+                            </div>
+                    <h3>技术原理</h3>
+                            </div>
+                <div class="section-content">
+                    <p>背诵比对功能基于先进的自然语言处理技术，通过以下核心技术实现高精度的背诵评估：</p>
+                    <div class="tech-features">
+                        <div class="tech-feature">
+                            <div class="tech-icon">
+                                <i class="fas fa-brain"></i>
+                        </div>
+                            <div class="tech-text">
+                                <h4>语义理解</h4>
+                                <p>不仅比对文字的相似度，更能理解内容的语义，允许同义表达和合理的语序变化</p>
+                        </div>
+                        </div>
+                        <div class="tech-feature">
+                            <div class="tech-icon">
+                                <i class="fas fa-camera-retro"></i>
+                        </div>
+                            <div class="tech-text">
+                                <h4>OCR文本识别</h4>
+                                <p>支持拍照上传教材原文，自动识别文字内容，无需手动输入长篇文本</p>
+                            </div>
+                            </div>
+                        <div class="tech-feature">
+                            <div class="tech-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="tech-text">
+                                <h4>多维度评估</h4>
+                                <p>从完整度、准确性、逻辑性等多个维度评估背诵质量，提供全面分析</p>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            <!-- 使用流程部分 -->
+            <div class="recite-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-tasks"></i>
+                            </div>
+                    <h3>使用流程</h3>
+                            </div>
+                <div class="section-content">
+                    <div class="process-steps">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>输入标准文本</h4>
+                                <p>拍照上传教材/笔记，或直接输入需要背诵的标准文本</p>
+                                <div class="step-visual">
+                                    <div class="apple-style-icon">
+                                        <i class="fas fa-book-open"></i>
+                                        <div class="icon-animation">
+                                            <i class="fas fa-camera"></i>
+                                            <i class="fas fa-arrow-right"></i>
+                                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        </div>
+                        </div>
+                        </div>
+                            </div>
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>录入背诵内容</h4>
+                                <p>通过语音录制或文字输入方式，录入你的背诵内容</p>
+                                <div class="step-visual">
+                                    <div class="apple-style-icon">
+                                        <i class="fas fa-microphone"></i>
+                                        <div class="icon-animation">
+                                            <span class="sound-wave"></span>
+                                            <span class="sound-wave"></span>
+                                            <span class="sound-wave"></span>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>获取分析结果</h4>
+                                <p>系统自动分析背诵质量，提供详细的评分和改进建议</p>
+                                <div class="step-visual">
+                                    <div class="apple-style-icon">
+                                        <i class="fas fa-chart-pie"></i>
+                                        <div class="icon-animation">
+                                            <div class="result-bar"></div>
+                                            <div class="result-bar"></div>
+                                            <div class="result-bar"></div>
+                            </div>
+                            </div>
+                        </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                        </div>
+                        
+            <!-- 用户案例部分 -->
+            <div class="recite-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3>用户案例</h3>
+                </div>
+                <div class="section-content">
+                    <div class="testimonials">
+                        <div class="testimonial">
+                            <div class="testimonial-content">
+                                <div class="quote-icon">
+                                    <i class="fas fa-quote-left"></i>
+                                </div>
+                                <p>背诵马原的时候总是容易混淆概念，用了背诵比对功能后，发现自己经常把"实践是检验真理的唯一标准"说成"根本标准"，这个细节在考试中很容易失分。现在我的政治背诵准确率提高了15%！</p>
+                                <div class="case-visual">
+                                    <div class="subject-icon politics">
+                                        <i class="fas fa-landmark"></i>
+                                        <span class="accuracy-badge">+15%</span>
+                                    </div>
+                                    <div class="comparison-visual">
+                                        <div class="text-line wrong"></div>
+                                        <div class="text-line correct"></div>
+                                        <div class="text-line"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="testimonial-author">
+                                <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="用户头像" class="author-avatar">
+                                <div class="author-info">
+                                    <h4>李同学</h4>
+                                    <p>北京大学 · 哲学专业</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="testimonial">
+                            <div class="testimonial-content">
+                                <div class="quote-icon">
+                                    <i class="fas fa-quote-left"></i>
+                                </div>
+                                <p>英语作文背诵是我的弱项，用了背诵比对后，不仅能发现我遗漏的句子，还会指出我的表达不够地道的地方。最棒的是可以直接拍照上传范文，省去了手动输入的麻烦。</p>
+                                <div class="case-visual">
+                                    <div class="subject-icon english">
+                                        <i class="fas fa-language"></i>
+                                        <span class="accuracy-badge">A+</span>
+                                    </div>
+                                    <div class="comparison-visual">
+                                        <div class="text-line"></div>
+                                        <div class="text-line missing"></div>
+                                        <div class="text-line"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="testimonial-author">
+                                <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="用户头像" class="author-avatar">
+                                <div class="author-info">
+                                    <h4>张同学</h4>
+                                    <p>复旦大学 · 国际关系</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                        </div>
+                        
+            <!-- 体验效果部分 -->
+            <div class="recite-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-chart-line"></i>
+                            </div>
+                    <h3>体验效果</h3>
+                            </div>
+                <div class="section-content">
+                    <div class="stats-container">
+                        <div class="stat-item">
+                            <div class="stat-number">85%</div>
+                            <div class="stat-label">用户背诵准确率提升</div>
+                            </div>
+                        <div class="stat-item">
+                            <div class="stat-number">40%</div>
+                            <div class="stat-label">背诵时间节省</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">92%</div>
+                            <div class="stat-label">用户满意度</div>
+                        </div>
+                    </div>
+                    
+                    <div class="cta-container">
+                        <a href="#recite" class="cta-button">
+                            <i class="fas fa-play-circle mr-2"></i>
+                            立即体验背诵比对
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip"></div>
+    <div class="version-badge">v1.2.9</div>
+
+    <!-- 页面底部 -->
+    <footer class="mt-12 py-8 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-600 dark:text-gray-400">「岸上见」App原型设计 © 2025</p>
+        </div>
+    </footer>
+
+    <script>
+        // 开屏页播放控制
+        const loopControl = document.getElementById('loopControl');
+        const splashFrame = document.getElementById('splashFrame');
+
+        function reloadSplash() {
+            splashFrame.src = splashFrame.src;
+        }
+
+        loopControl.addEventListener('click', () => {
+            // 单次播放开屏页
+            reloadSplash(); // 重新加载开屏页
+            showTooltip('正在播放开屏页，5秒后将自动进入App...');
+        });
+        
+        // 深色模式切换
+        const themeToggle = document.getElementById('themeToggle');
+        const tooltipEl = document.getElementById('tooltip');
+        
+        // 检查系统深色模式偏好
+        const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // 检查本地存储中的主题设置
+        let savedTheme = localStorage.getItem('darkModeType');
+        if (savedTheme === null && prefersDarkMode) {
+            // 如果没有保存的设置但系统偏好深色模式
+            document.body.classList.add('dark-mode');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            localStorage.setItem('darkModeType', 'dark');
+        } else if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            if (document.body.classList.contains('dark-mode')) {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('darkModeType', 'light');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                showTooltip('已切换至浅色模式');
+            } else {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('darkModeType', 'dark');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                showTooltip('已切换至深色模式');
+            }
+        });
+        
+        // 页面导航
+        const navItems = document.querySelectorAll('.page-nav-item');
+        const prototypeItems = document.querySelectorAll('.prototype-item');
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const index = parseInt(item.getAttribute('data-index'));
+                const tooltipText = item.getAttribute('data-tooltip');
+                
+                // 更新导航项状态
+                navItems.forEach(navItem => navItem.classList.remove('active'));
+                item.classList.add('active');
+                
+                // 滚动到对应的原型项
+                prototypeItems[index].scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start' 
+                });
+                
+                showTooltip(`正在查看 ${tooltipText}`);
+            });
+        });
+        
+        // 监听滚动，更新导航状态
+        window.addEventListener('scroll', () => {
+            const scrollPosition = window.scrollY;
+            
+            prototypeItems.forEach((item, index) => {
+                const rect = item.getBoundingClientRect();
+                
+                if (rect.top <= 200 && rect.bottom >= 200) {
+                    navItems.forEach(navItem => navItem.classList.remove('active'));
+                    navItems[index].classList.add('active');
+                }
+            });
+        });
+        
+        // 显示提示信息
+        function showTooltip(message) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.textContent = message;
+            tooltip.classList.add('show');
+            
+            // 3秒后隐藏提示
+            setTimeout(() => {
+                tooltip.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 监听系统深色模式变化
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            const savedTheme = localStorage.getItem('darkModeType');
+            // 只有当用户没有明确设置偏好时，才跟随系统
+            if (savedTheme === null) {
+                if (e.matches) {
+                    document.body.classList.add('dark-mode');
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+            }
+        });
+        
+        // 给原型框添加悬停音效反馈
+        const phoneFrames = document.querySelectorAll('.phone-frame');
+        phoneFrames.forEach(frame => {
+            frame.addEventListener('mouseenter', () => {
+                if (window.AudioContext) {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.value = 880; // A5
+                    gainNode.gain.value = 0.05;
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    
+                    oscillator.start();
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                    
+                    setTimeout(() => {
+                        oscillator.stop();
+                    }, 300);
+                }
+            });
+        });
+        
+        // 页面加载完成后的动画效果
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                showTooltip('原型设计加载完成 👋');
+            }, 1000);
+        });
+
+        // 滚动监听，控制顶部卡片的显示和隐藏
+        document.addEventListener('DOMContentLoaded', function() {
+            const headerFixed = document.getElementById('headerFixed');
+            let lastScrollTop = 0;
+            let scrollThreshold = 100;
+            
+            // 初始状态设置
+            headerFixed.style.transform = 'translateY(0)';
+            headerFixed.style.opacity = '1';
+            
+            window.addEventListener('scroll', function() {
+                const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // 向下滚动超过阈值，隐藏标题
+                if (currentScroll > lastScrollTop && currentScroll > scrollThreshold) {
+                    headerFixed.style.transform = 'translateY(-100%)';
+                    headerFixed.style.opacity = '0';
+                } 
+                // 向上滚动或在顶部，显示标题
+                else if (currentScroll < lastScrollTop || currentScroll < scrollThreshold) {
+                    headerFixed.style.transform = 'translateY(0)';
+                    headerFixed.style.opacity = '1';
+                }
+                
+                lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // 防止负滚动
+            }, false);
+        });
+    </script>
+</body>
+</html> 

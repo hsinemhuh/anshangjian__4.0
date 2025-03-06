@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外观设置 - 岸上见</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dark-mode.css">
+    <script src="../js/theme-init.js"></script>
+    <style>
+        .font-size-preview p {
+            margin-bottom: 8px;
+            color: #000000;
+        }
+        
+        .dark-mode .font-size-preview p {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <div class="sticky top-0 bg-white z-10 px-4 py-3 border-b border-gray-200">
+            <div class="flex items-center">
+                <button onclick="history.back()" class="mr-4" title="返回">
+                    <i class="fas fa-arrow-left text-xl text-gray-600"></i>
+                </button>
+                <h1 class="text-lg font-semibold">外观设置</h1>
+            </div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content-area px-4 py-4">
+            <!-- 深色模式设置 -->
+            <div class="settings-group mb-6">
+                <div class="p-4 border-b border-gray-100">
+                    <h2 class="text-lg font-semibold mb-4">显示模式</h2>
+                    
+                    <div class="appearance-option light-option selected" onclick="selectAppearance('light')">
+                        <div class="appearance-preview light-preview">
+                            <div class="preview-top"></div>
+                            <div class="preview-content">
+                                <div class="preview-line"></div>
+                                <div class="preview-line"></div>
+                                <div class="preview-line"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">浅色模式</h3>
+                            <p class="text-sm text-gray-500">默认的明亮主题</p>
+                        </div>
+                    </div>
+                    
+                    <div class="appearance-option dark-option" onclick="selectAppearance('dark')">
+                        <div class="appearance-preview dark-preview">
+                            <div class="preview-top"></div>
+                            <div class="preview-content">
+                                <div class="preview-line"></div>
+                                <div class="preview-line"></div>
+                                <div class="preview-line"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">深色模式</h3>
+                            <p class="text-sm text-gray-500">降低亮度，适合夜间使用</p>
+                        </div>
+                    </div>
+                    
+                    <div class="appearance-option system-option" onclick="selectAppearance('system')">
+                        <div class="appearance-preview system-preview">
+                            <div class="preview-top"></div>
+                            <div class="preview-content">
+                                <div class="preview-line"></div>
+                                <div class="preview-line"></div>
+                                <div class="preview-line"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">跟随系统</h3>
+                            <p class="text-sm text-gray-500">根据系统设置自动切换</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 自动切换时间 -->
+                <div class="settings-item">
+                    <div class="flex items-center">
+                        <div class="settings-icon" style="background-color: #8971D0;">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <span>定时切换深色模式</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoSwitchToggle" onchange="toggleAutoSwitch()" title="定时切换深色模式" aria-label="定时切换深色模式">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div id="timeSettings" class="p-4 border-t border-gray-100 hidden">
+                    <div class="flex justify-between mb-4">
+                        <div>
+                            <h3 class="font-semibold">开始时间</h3>
+                            <select class="mt-2 p-2 bg-gray-100 rounded-md" id="startTime" title="深色模式开始时间" aria-label="深色模式开始时间">
+                                <option value="18:00">18:00</option>
+                                <option value="19:00">19:00</option>
+                                <option value="20:00" selected>20:00</option>
+                                <option value="21:00">21:00</option>
+                                <option value="22:00">22:00</option>
+                            </select>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">结束时间</h3>
+                            <select class="mt-2 p-2 bg-gray-100 rounded-md" id="endTime" title="深色模式结束时间" aria-label="深色模式结束时间">
+                                <option value="5:00">5:00</option>
+                                <option value="6:00" selected>6:00</option>
+                                <option value="7:00">7:00</option>
+                                <option value="8:00">8:00</option>
+                                <option value="9:00">9:00</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500">在设定的时间段内自动切换到深色模式</p>
+                </div>
+            </div>
+            
+            <!-- 主题颜色 -->
+            <div class="settings-group mb-6">
+                <div class="p-4">
+                    <h2 class="text-lg font-semibold mb-4">主题颜色</h2>
+                    <div class="flex justify-center">
+                        <div class="color-option color-red selected" onclick="selectColor('red')"></div>
+                        <div class="color-option color-blue" onclick="selectColor('blue')"></div>
+                        <div class="color-option color-green" onclick="selectColor('green')"></div>
+                        <div class="color-option color-purple" onclick="selectColor('purple')"></div>
+                        <div class="color-option color-orange" onclick="selectColor('orange')"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 字体大小 -->
+            <div class="settings-group">
+                <div class="p-4">
+                    <h2 class="text-lg font-semibold mb-4">字体大小</h2>
+                    
+                    <div class="font-size-option">
+                        <span class="text-sm">A</span>
+                        <input type="range" min="1" max="4" value="2" class="w-full mx-4" id="fontSizeSlider" oninput="changeFontSize()" title="调整字体大小" aria-label="调整字体大小">
+                        <span class="text-lg">A</span>
+                    </div>
+                    
+                    <div class="bg-gray-100 rounded-lg p-4 mt-4">
+                        <div id="fontSizePreview" class="font-size-medium">
+                            <p class="font-semibold">预览文本</p>
+                            <p>这是一段示例文本，用于预览不同字体大小的效果。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 应用按钮 -->
+            <div class="mt-6">
+                <button class="w-full py-3 text-center text-white font-semibold bg-red-500 rounded-lg" onclick="applySettings()">
+                    应用设置
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化设置
+        document.addEventListener('DOMContentLoaded', () => {
+            // 检查深色模式设置
+            const darkMode = localStorage.getItem('darkMode');
+            const darkModeType = localStorage.getItem('darkModeType') || 'light';
+            
+            if (darkMode === 'enabled') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            // 选择当前的显示模式
+            selectAppearance(darkModeType, false);
+            
+            // 检查自动切换设置
+            const autoSwitch = localStorage.getItem('autoSwitch');
+            if (autoSwitch === 'enabled') {
+                document.getElementById('autoSwitchToggle').checked = true;
+                document.getElementById('timeSettings').classList.remove('hidden');
+                
+                // 设置时间
+                const startTime = localStorage.getItem('startTime') || '20:00';
+                const endTime = localStorage.getItem('endTime') || '6:00';
+                document.getElementById('startTime').value = startTime;
+                document.getElementById('endTime').value = endTime;
+            }
+            
+            // 检查主题颜色
+            const themeColor = localStorage.getItem('themeColor') || 'red';
+            selectColor(themeColor, false);
+            
+            // 检查字体大小
+            const fontSize = localStorage.getItem('fontSize') || '2';
+            document.getElementById('fontSizeSlider').value = fontSize;
+            changeFontSize(false);
+        });
+        
+        // 选择显示模式
+        function selectAppearance(mode, showToast = true) {
+            // 移除所有选中状态
+            document.querySelectorAll('.appearance-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // 添加选中状态
+            document.querySelector(`.${mode}-option`).classList.add('selected');
+            
+            // 保存设置
+            localStorage.setItem('darkModeType', mode);
+            
+            // 立即应用显示模式
+            applyAppearanceMode(mode);
+            
+            if (showToast) {
+                showToast(`已选择${mode === 'light' ? '浅色' : mode === 'dark' ? '深色' : '跟随系统'}模式`);
+            }
+        }
+        
+        // 应用显示模式
+        function applyAppearanceMode(mode) {
+            if (mode === 'dark') {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'enabled');
+            } else if (mode === 'light') {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'disabled');
+            } else if (mode === 'system') {
+                // 检测系统深色模式
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+                
+                // 监听系统深色模式变化
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                    if (e.matches) {
+                        document.body.classList.add('dark-mode');
+                        localStorage.setItem('darkMode', 'enabled');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                        localStorage.setItem('darkMode', 'disabled');
+                    }
+                });
+            }
+        }
+        
+        // 切换自动深色模式
+        function toggleAutoSwitch() {
+            const autoSwitchToggle = document.getElementById('autoSwitchToggle');
+            const timeSettings = document.getElementById('timeSettings');
+            
+            if (autoSwitchToggle.checked) {
+                timeSettings.classList.remove('hidden');
+                localStorage.setItem('autoSwitch', 'enabled');
+                
+                // 立即应用自动切换设置
+                applyAutoSwitchSettings();
+            } else {
+                timeSettings.classList.add('hidden');
+                localStorage.setItem('autoSwitch', 'disabled');
+            }
+        }
+        
+        // 应用自动切换设置
+        function applyAutoSwitchSettings() {
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            
+            localStorage.setItem('startTime', startTime);
+            localStorage.setItem('endTime', endTime);
+            
+            // 检查当前时间是否在深色模式时间范围内
+            checkDarkModeTime();
+        }
+        
+        // 检查当前时间是否在深色模式时间范围内
+        function checkDarkModeTime() {
+            const startTime = localStorage.getItem('startTime') || '20:00';
+            const endTime = localStorage.getItem('endTime') || '6:00';
+            
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const currentTime = `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
+            
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const [endHour, endMinute] = endTime.split(':').map(Number);
+            
+            const isNightTime = (
+                (hours > startHour || (hours === startHour && minutes >= startMinute)) ||
+                (hours < endHour || (hours === endHour && minutes < endMinute))
+            );
+            
+            if (isNightTime) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+        
+        // 选择主题颜色
+        function selectColor(color, showToast = true) {
+            // 移除所有选中状态
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // 添加选中状态
+            document.querySelector(`.color-${color}`).classList.add('selected');
+            
+            // 保存设置
+            localStorage.setItem('themeColor', color);
+            
+            // 立即应用主题颜色
+            applyThemeColor(color);
+            
+            if (showToast) {
+                const colorNames = {
+                    'red': '红色',
+                    'blue': '蓝色',
+                    'green': '绿色',
+                    'purple': '紫色',
+                    'orange': '橙色'
+                };
+                showToast(`已选择${colorNames[color]}主题`);
+            }
+        }
+        
+        // 应用主题颜色
+        function applyThemeColor(color) {
+            // 移除所有主题颜色类
+            document.body.classList.remove('theme-red', 'theme-blue', 'theme-green', 'theme-purple', 'theme-orange');
+            
+            // 添加选中的主题颜色类
+            document.body.classList.add(`theme-${color}`);
+            
+            // 更新CSS变量
+            const colors = {
+                'red': '#ff2442',
+                'blue': '#007AFF',
+                'green': '#34C759',
+                'purple': '#AF52DE',
+                'orange': '#FF9500'
+            };
+            
+            document.documentElement.style.setProperty('--primary-color', colors[color]);
+            document.documentElement.style.setProperty('--primary-color-dark', adjustColorBrightness(colors[color], -20));
+        }
+        
+        // 调整颜色亮度
+        function adjustColorBrightness(hex, percent) {
+            // 将十六进制颜色转换为RGB
+            let r = parseInt(hex.substring(1, 3), 16);
+            let g = parseInt(hex.substring(3, 5), 16);
+            let b = parseInt(hex.substring(5, 7), 16);
+            
+            // 调整亮度
+            r = Math.max(0, Math.min(255, r + percent));
+            g = Math.max(0, Math.min(255, g + percent));
+            b = Math.max(0, Math.min(255, b + percent));
+            
+            // 转换回十六进制
+            return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+        }
+        
+        // 更改字体大小
+        function changeFontSize(showToast = true) {
+            const sizeSlider = document.getElementById('fontSizeSlider');
+            const preview = document.getElementById('fontSizePreview');
+            const sizeValue = sizeSlider.value;
+            
+            // 移除所有字体大小类
+            preview.classList.remove('font-size-small', 'font-size-medium', 'font-size-large', 'font-size-xlarge');
+            
+            // 添加对应的字体大小类
+            const sizeClasses = ['font-size-small', 'font-size-medium', 'font-size-large', 'font-size-xlarge'];
+            preview.classList.add(sizeClasses[sizeValue - 1]);
+            
+            // 保存设置
+            localStorage.setItem('fontSize', sizeValue);
+            
+            // 立即应用字体大小
+            applyFontSize(sizeValue);
+            
+            if (showToast) {
+                const sizeNames = ['小', '中', '大', '特大'];
+                showToast(`已选择${sizeNames[sizeValue - 1]}号字体`);
+            }
+        }
+        
+        // 应用字体大小
+        function applyFontSize(size) {
+            const sizeClasses = ['text-xs', 'text-sm', 'text-base', 'text-lg'];
+            document.querySelectorAll('.text-sm, .text-xs, .text-base, .text-lg').forEach(el => {
+                // 移除所有字体大小类
+                sizeClasses.forEach(cls => {
+                    el.classList.remove(cls);
+                });
+                
+                // 根据设置添加对应的字体大小类
+                const currentSize = parseInt(size);
+                if (currentSize === 1) {
+                    el.classList.add('text-xs');
+                } else if (currentSize === 2) {
+                    el.classList.add('text-sm');
+                } else if (currentSize === 3) {
+                    el.classList.add('text-base');
+                } else if (currentSize === 4) {
+                    el.classList.add('text-lg');
+                }
+            });
+            
+            // 保存设置
+            localStorage.setItem('fontSize', size);
+        }
+        
+        // 监听时间选择器变化
+        document.getElementById('startTime').addEventListener('change', function() {
+            localStorage.setItem('startTime', this.value);
+            if (document.getElementById('autoSwitchToggle').checked) {
+                checkDarkModeTime();
+            }
+        });
+        
+        document.getElementById('endTime').addEventListener('change', function() {
+            localStorage.setItem('endTime', this.value);
+            if (document.getElementById('autoSwitchToggle').checked) {
+                checkDarkModeTime();
+            }
+        });
+        
+        // 应用设置
+        function applySettings() {
+            showToast('设置已应用');
+            setTimeout(() => {
+                history.back();
+            }, 1000);
+        }
+        
+        // 显示提示消息
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 2000);
+        }
+        
+        // 页面加载时初始化设置
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化显示模式
+            const darkModeType = localStorage.getItem('darkModeType') || 'light';
+            selectAppearance(darkModeType, false);
+            
+            // 初始化自动切换
+            const autoSwitch = localStorage.getItem('autoSwitch');
+            const autoSwitchToggle = document.getElementById('autoSwitchToggle');
+            const timeSettings = document.getElementById('timeSettings');
+            
+            if (autoSwitch === 'enabled') {
+                autoSwitchToggle.checked = true;
+                timeSettings.classList.remove('hidden');
+                
+                // 设置定时器检查时间
+                setInterval(checkDarkModeTime, 60000); // 每分钟检查一次
+                
+                // 初始化时间设置
+                const startTime = localStorage.getItem('startTime') || '20:00';
+                const endTime = localStorage.getItem('endTime') || '6:00';
+                
+                document.getElementById('startTime').value = startTime;
+                document.getElementById('endTime').value = endTime;
+            } else {
+                autoSwitchToggle.checked = false;
+                timeSettings.classList.add('hidden');
+            }
+            
+            // 初始化主题颜色
+            const themeColor = localStorage.getItem('themeColor') || 'red';
+            selectColor(themeColor, false);
+            
+            // 初始化字体大小
+            const fontSize = localStorage.getItem('fontSize') || '2';
+            document.getElementById('fontSizeSlider').value = fontSize;
+            
+            // 更新字体大小预览
+            const preview = document.getElementById('fontSizePreview');
+            preview.classList.remove('font-size-small', 'font-size-medium', 'font-size-large', 'font-size-xlarge');
+            
+            const sizeClasses = ['font-size-small', 'font-size-medium', 'font-size-large', 'font-size-xlarge'];
+            preview.classList.add(sizeClasses[fontSize - 1]);
+            
+            // 应用字体大小到全局
+            applyFontSize(fontSize);
+        });
+    </script>
+</body>
+</html> 
